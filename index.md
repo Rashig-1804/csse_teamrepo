@@ -5,7 +5,7 @@ hide: true
 show_reading_time: false
 ---
 
-Hi! We are a team, working together to code games, and projects. Our team is Rashi, Sadaf, Daniel, Aadi, Sujay, and Arjun. 
+Hi! We are a team, working together to code games, and projects. Our team is Rashi, Sadaf, Daniel, Aadi, Sujay, and Arjun! 
 
 ### Development Environment
 
