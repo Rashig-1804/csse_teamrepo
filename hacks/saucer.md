@@ -1,7 +1,7 @@
 ---
 layout: opencs
 title: Flying Saucer Game
-permalink: /background
+permalink: /saucer
 ---
 
 
