@@ -37,16 +37,19 @@ jobs:
         run: |
           gem install bundler
           bundle install
-      - name: Install Python dependencies
+      - name: Set up Python venv and install dependencies
         run: |
-          python -m venv venv  # Create virtual environment
-          source venv/bin/activate  # Activate the virtual environment
-          pip install -r requirements.txt  # Install Python packages
+          python -m venv venv
+          . venv/bin/activate
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
+          # Verify required package is importable to fail fast with clear log
+          python -c "import importlib, sys; importlib.import_module('progress'); print('progress import OK')"
 
-      - name: Execute conversion script
+      - name: Convert notebooks
         run: |
-          source venv/bin/activate  # Activate virtual environment
-          python scripts/convert_notebooks.py  # Run your Python script
+          . venv/bin/activate
+          python scripts/convert_notebooks.py
       - name: Build with Jekyll
         run: |
           bundle exec jekyll build  # Build your Jekyll site
