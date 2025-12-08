@@ -113,4 +113,4 @@ permalink: /background
     world.start();
   }
   
-<script>
+</script>
