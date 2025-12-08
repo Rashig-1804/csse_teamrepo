@@ -14,8 +14,11 @@ permalink: /background
   const ctx = canvas.getContext('2d');
   const backgroundImg = new Image();
   const spriteImg = new Image();
-  backgroundImg.src = '{{page.background}}';
-  spriteImg.src = '{{page.sprite}}';
+  backgroundImg.src = '{{ page.background | relative_url }}';
+  spriteImg.src = '{{ page.sprite | relative_url }}';
+
+  console.log('backgroundImg.src ->', backgroundImg.src);
+  console.log('spriteImg.src ->', spriteImg.src);
 
   let imagesLoaded = 0;
   backgroundImg.onload = function() {
