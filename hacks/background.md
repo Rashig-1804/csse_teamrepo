@@ -112,3 +112,5 @@ permalink: /background
     const world = new GameWorld(backgroundImg, spriteImg);
     world.start();
   }
+  
+<script>
