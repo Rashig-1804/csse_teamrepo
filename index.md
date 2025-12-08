@@ -43,7 +43,7 @@ Hi! We are a team, working together to code games, and projects, such as snake g
             Turtle
         </div>
     </a>
-    <a href="{{site.baseurl}}/background" style="text-decoration: none;">
+    <a href="{{site.baseurl}}/background.md" style="text-decoration: none;">
          <div style="background-color: #aa11fcff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
             Saucer Game
         </div>
