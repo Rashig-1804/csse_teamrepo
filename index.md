@@ -63,9 +63,11 @@ Hi! We are a team, working together to code games, and projects, such as snake g
             Ping Pong
         </div>
     </a>
-
-    
-
+     <a href="{{site.baseurl}}/cookie" style="text-decoration: none;">
+         <div style="background-color: #e90df9ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+            Cookie Clicker
+        </div>
+    </a>
     
 </div>
 
