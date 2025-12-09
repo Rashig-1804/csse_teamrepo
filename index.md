@@ -58,6 +58,13 @@ Hi! We are a team, working together to code games, and projects, such as snake g
             Rock Paper Scissors
         </div>
     </a>
+    <a href="{{site.baseurl}}/pong" style="text-decoration: none;">
+         <div style="background-color: #f90d0dff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+            Ping Pong
+        </div>
+    </a>
+
+    
 
     
 </div>
