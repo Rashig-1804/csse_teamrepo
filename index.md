@@ -53,6 +53,13 @@ Hi! We are a team, working together to code games, and projects, such as snake g
             Calculator
         </div>
     </a>
+    <a href="{{site.baseurl}}/rockpaper" style="text-decoration: none;">
+         <div style="background-color: #1911fcff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+            Rock Paper Scissors
+        </div>
+    </a>
+
+    
 </div>
 
 <br>
