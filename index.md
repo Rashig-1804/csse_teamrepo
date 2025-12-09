@@ -48,9 +48,9 @@ Hi! We are a team, working together to code games, and projects, such as snake g
             Saucer Game
         </div>
     </a>
-    <a href="{{site.baseurl}}/background" style="text-decoration: none;">
-         <div style="background-color: #aa11fcff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
-            Saucer Game
+    <a href="{{site.baseurl}}/calculator" style="text-decoration: none;">
+         <div style="background-color: #11fc67ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+            Calculator
         </div>
     </a>
 </div>
