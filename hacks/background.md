@@ -70,12 +70,37 @@ permalink: /background
         const x = (gameWorld.width - width) / 2;
         const y = (gameWorld.height - height) / 2;
         super(image, width, height, x, y);
-        this.baseY = y;
-        this.frame = 0;
+        this.gameWorld = gameWorld;
+        this.speedY = 0; // current vertical speed
+        this.maxSpeed = 8; // max moving speed
+        this.accel = 1.5; // acceleration per frame when key pressed
       }
       update() {
-        this.y = this.baseY + Math.sin(this.frame * 0.05) * 20;
-        this.frame++;
+        // Read input state from the game world (set up in GameWorld)
+        const input = this.gameWorld.input || { up: false, down: false };
+
+        if (input.up && !input.down) {
+          this.speedY = Math.max(this.speedY - this.accel, -this.maxSpeed);
+        } else if (input.down && !input.up) {
+          this.speedY = Math.min(this.speedY + this.accel, this.maxSpeed);
+        } else {
+          // apply friction to slow down smoothly
+          this.speedY *= 0.85;
+          if (Math.abs(this.speedY) < 0.1) this.speedY = 0;
+        }
+
+        this.y += this.speedY;
+
+        // Keep the player inside the canvas bounds
+        const minY = 0;
+        const maxY = this.gameWorld.height - this.height;
+        if (this.y < minY) {
+          this.y = minY;
+          this.speedY = 0;
+        } else if (this.y > maxY) {
+          this.y = maxY;
+          this.speedY = 0;
+        }
       }
     }
 
