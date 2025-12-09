@@ -49,12 +49,14 @@ permalink: /calculator
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    background: #f0f0f0;
+    background: #4CAF50;
+    color: white;
+    font-weight: bold;
     transition: background 0.2s;
   }
 
   button:hover {
-    background: #e0e0e0;
+    background: #45a049;
   }
 
   button.operator {
