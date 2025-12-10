@@ -93,3 +93,30 @@ permalink: /pong
       resetBall("left");
     }
   }
+  let paused = true;
+  const keys = {};
+  const modeSelect = document.getElementById('mode');
+  const speedSelect = document.getElementById('speed');
+
+  function handleInput(){
+    if(keys["w"]) left.dy = -paddle.speed;
+    else if(keys["s"]) left.dy = paddle.speed;
+    else left.dy = 0;
+
+    if(modeSelect.value === "pvp"){
+      if(keys["arrowup"]) right.dy = -paddle.speed;
+      else if(keys["arrowdown"]) right.dy = paddle.speed;
+      else right.dy = 0;
+    }
+  }
+
+  document.addEventListener("keydown", e => {
+    const key = e.key.toLowerCase();
+    keys[key] = true;
+    if(key === " ") paused = !paused;
+  });
+
+  document.addEventListener("keyup", e => {
+    const key = e.key.toLowerCase();
+    keys[key] = false;
+  });
