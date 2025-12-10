@@ -30,12 +30,9 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
   </a>
 </div>
 
-
 <br>
 
-
 ### Class Progress
-
 
 > Here is my progress through coding, click to see these online
 
@@ -68,12 +65,25 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
     </div>
   </a>
 
-
   <a href="{{ site.baseurl }}/connect4/" style="text-decoration: none;">
     <div style="background-color: #FFD700; color: black; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
       Connect 4
     </div>
   </a>
+
+  <a href="{{ site.baseurl }}/pong" style="text-decoration: none;">
+    <div style="background-color: #ca1818ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Connect 4
+    </div>
+  </a>
+
+  <a href="{{ site.baseurl }}/rockpaper" style="text-decoration: none;">
+    <div style="background-color: #169eb6ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Connect 4
+    </div>
+  </a>
+
+
 </div>
 
 
