@@ -1,3 +1,9 @@
+---
+layout: opencs
+title: Ping Pong
+description: Use JavaScript to code a ping pong game
+permalink: /pong
+---
 <div style="max-width:900px;margin:18px auto;text-align:center;">
   <h2>Ping Pong</h2>
   <p>Controls: Left paddle — W / S. Right paddle — Up / Down. Press <strong>Space</strong> to pause or start.</p>
