@@ -15,3 +15,22 @@ permalink: /rockpaper
   <h1>Rock Paper Scissors</h1>
 </body>
 </html>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+  }
+  button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+  }
+  #result {
+    font-size: 24px;
+    margin-top: 20px;
+    font-weight: bold;
+  }
+</style>
