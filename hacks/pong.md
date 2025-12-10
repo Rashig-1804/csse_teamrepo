@@ -63,3 +63,33 @@ permalink: /pong
     drawRect(right.x,right.y,paddle.w,paddle.h,"#f0f3bd");
     drawCircle(ball.x,ball.y,ball.r,"#ff6b6b");
   }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+
+  function resetBall(side){
+    ball.x = W/2;
+    ball.y = H/2;
+    const speed = 5 + Math.random()*3;
+    const angle = (Math.random()*Math.PI/4) - Math.PI/8;
+
+    ball.vx = (side === "left" ? 1 : -1) * speed;
+    ball.vy = speed * Math.tan(angle);
+  }
+
+  function update(){
+    ball.x += ball.vx * Number(speedSelect.value);
+    ball.y += ball.vy * Number(speedSelect.value);
+
+    if(ball.y - ball.r < 0 || ball.y + ball.r > H){
+      ball.vy *= -1;
+    }
+
+    if(ball.x < 0){
+      right.score++;
+      resetBall("right");
+    }
+
+    if(ball.x > W){
+      left.score++;
+      resetBall("left");
+    }
+  }
