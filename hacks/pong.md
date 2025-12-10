@@ -120,3 +120,34 @@ permalink: /pong
     const key = e.key.toLowerCase();
     keys[key] = false;
   });
+  document.getElementById("restart").onclick = () => {
+    left.score = 0;
+    right.score = 0;
+    resetBall("left");
+    paused = true;
+  };
+
+  function gameLoop(){
+    if(!paused){
+      handleInput();
+
+      left.y = clamp(left.y + left.dy,0,H-paddle.h);
+
+      if(modeSelect.value === "pvai"){
+        const target = ball.y - paddle.h/2;
+        const diff = target - right.y;
+        right.dy = clamp(diff * 0.08, -paddle.speed, paddle.speed);
+      }
+
+      right.y = clamp(right.y + right.dy,0,H-paddle.h);
+
+      update();
+    }
+
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+})();
+</script>
