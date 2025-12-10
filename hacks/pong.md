@@ -34,3 +34,32 @@ permalink: /pong
 </div>
 
 <p id="status" style="margin-top:10px;font-family:monospace;color:#ddd;"></p>
+<script>
+(function(){
+  const canvas = document.getElementById('pong');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const paddle = {w:12, h:90, speed:6};
+  const left = {x:20, y:(H-90)/2, dy:0, score:0};
+  const right = {x:W-32, y:(H-90)/2, dy:0, score:0};
+
+  const ball = {x:W/2, y:H/2, r:9, vx:5, vy:3};
+
+  function drawRect(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); }
+  function drawCircle(x,y,r,c){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=c; ctx.fill(); }
+
+  function drawNet(){
+    for(let i=10;i<H;i+=22){
+      drawRect(W/2 - 1, i, 2, 12, "#2ec4b6");
+    }
+  }
+
+  function draw(){
+    ctx.fillStyle = "#0b1220";
+    ctx.fillRect(0,0,W,H);
+    drawNet();
+    drawRect(left.x,left.y,paddle.w,paddle.h,"#f0f3bd");
+    drawRect(right.x,right.y,paddle.w,paddle.h,"#f0f3bd");
+    drawCircle(ball.x,ball.y,ball.r,"#ff6b6b");
+  }
