@@ -83,18 +83,27 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
     </div>
   </a>
 
+  <a href="{{ site.baseurl }}/cookie" style="text-decoration: none;">
+    <div style="background-color: #4d430b34; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Cookie Clicker
+    </div>
+  </a>
+
+  
+  <a href="{{ site.baseurl }}/memory" style="text-decoration: none;">
+    <div style="background-color: #4d430b34; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Memory Game
+    </div>
+  </a>
 
 </div>
 
 
 <br>
 
-
 ### Get in Touch
 
-
 > Feel free to reach out if you’d like to collaborate or learn more about our work.
-
 
 <p style="color: #2A7DB1;">
   Open Coding Society:
