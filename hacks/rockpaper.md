@@ -62,3 +62,16 @@ permalink: /rockpaper
     document.getElementById('result').innerText = result;
   }
 </script>
+
+<div>
+  <button onclick="play('paper')">Paper</button>
+</div>
+
+<script>
+  // Paper outcomes
+  if (playerChoice === 'paper' && computerChoice === 'rock') {
+    result = 'You win!';
+  } else if (playerChoice === 'paper' && computerChoice === 'scissors') {
+    result = 'You lose!';
+  }
+</script>
