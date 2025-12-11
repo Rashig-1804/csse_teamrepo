@@ -34,3 +34,31 @@ permalink: /rockpaper
     font-weight: bold;
   }
 </style>
+<div>
+  <button onclick="play('rock')">Rock</button>
+</div>
+
+<p id="player-choice"></p>
+<p id="computer-choice"></p>
+<p id="result"></p>
+
+<script>
+  function play(playerChoice) {
+    const choices = ['rock', 'paper', 'scissors'];
+    const computerChoice = choices[Math.floor(Math.random() * 3)];
+
+    document.getElementById('player-choice').innerText = `You chose: ${playerChoice}`;
+    document.getElementById('computer-choice').innerText = `Computer chose: ${computerChoice}`;
+
+    let result = '';
+    if (playerChoice === computerChoice) {
+      result = "It's a tie!";
+    } else if (playerChoice === 'rock' && computerChoice === 'scissors') {
+      result = "You win!";
+    } else if (playerChoice === 'rock' && computerChoice === 'paper') {
+      result = "You lose!";
+    }
+
+    document.getElementById('result').innerText = result;
+  }
+</script>
