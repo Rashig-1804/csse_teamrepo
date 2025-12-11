@@ -81,13 +81,32 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
 
   <a href="{{ site.baseurl }}/pong" style="text-decoration: none;">
     <div style="background-color: #ca1818ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
-      Connect 4
+      Ping Pong 
     </div>
   </a>
 
   <a href="{{ site.baseurl }}/rockpaper" style="text-decoration: none;">
     <div style="background-color: #169eb6ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
-      Connect 4
+      Rock Paper Scissors
+    </div>
+  </a>
+
+  <a href="{{ site.baseurl }}/cookie-clicker-game/" style="text-decoration: none;">
+    <div style="background-color: #493303e7; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Cookie Clicker
+    </div>
+  </a>
+
+
+  <a href="{{ site.baseurl }}/games/tictactoe" style="text-decoration: none;">
+    <div style="background-color: #ee4654ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Tic-Tac-Toe
+    </div>
+  </a>
+
+  <a href="{{ site.baseurl }}/memory" style="text-decoration: none;">
+    <div style="background-color: #ee4654ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Memory 
     </div>
   </a>
 
