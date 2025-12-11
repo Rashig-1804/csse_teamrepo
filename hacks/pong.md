@@ -4,198 +4,207 @@ title: Ping Pong
 description: Use JavaScript to code a ping pong game
 permalink: /pong
 ---
-<div style="max-width:900px;margin:18px auto;text-align:center;">
-  <h2>Ping Pong</h2>
-  <p>Controls: Left paddle — W / S. Right paddle — Up / Down. Press <strong>Space</strong> to pause or start.</p>
+## 🎮 Pong Game Demo (Enhanced)
 
-  <canvas id="pong" width="800" height="450" style="border:1px solid #ccc; display:block; margin:0 auto; background:#0b1220;">
-    Your browser doesn't support canvas.
-  </canvas>
-
-  <div style="margin-top:12px;">
-
-    <!-- Mode Selector -->
-    <label style="margin-left:12px;">Mode:
-      <select id="mode">
-        <option value="pvp">2-Player</option>
-        <option value="pvai">Player vs AI</option>
-      </select>
-    </label>
-
-    <!-- Speed Selector (SLOWER VALUES) -->
-    <label style="margin-left:12px;">Speed:
-      <select id="speed">
-        <option value="0.5">Slow</option>
-        <option value="0.8" selected>Normal</option>
-        <option value="1.1">Fast</option>
-        <option value="1.4">Ultra</option>
-      </select>
-    </label>
-
-    <!-- Restart Button -->
-    <button id="restart" style="margin-left:12px;">Restart</button>
-  </div>
-
-  <p id="status" style="margin-top:10px;font-family:monospace;color:#ddd;"></p>
+<div class="game-canvas-container" style="text-align:center;">
+  <canvas id="pongCanvas" width="800" height="500"></canvas>
+  <br>
+  <button id="restartBtn">Restart Game</button>
 </div>
 
+<style>
+  .game-canvas-container {
+    margin-top: 20px;
+  }
+  #pongCanvas {
+    border: 2px solid #fff;
+    background: #061426; /* darker bluish background */
+    display: block;
+    margin: 0 auto;
+  }
+  #restartBtn {
+    display: none;
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    background: #4caf50;
+    color: white;
+    cursor: pointer;
+  }
+  #restartBtn:hover { background: #45a049; }
+</style>
+
 <script>
-(function(){
-  const canvas = document.getElementById('pong');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+// Enhanced Pong — implements full student checklist
+// Features added:
+// 1) Config visuals tweaks
+// 2) Right-paddle AI (toggleable, difficulty multiplier)
+// 3) Rally speed-up on paddle hit (with max speed)
+// 4) Dashed center line + WebAudio score SFX
+// 5) Power-ups (spawn, collect, temporary effects)
+// 6) Pause/Resume (Space key)
+// 7) Win screen with replay countdown and auto-restart
 
-  // Game objects
-  const paddle = {w:12, h:90, speed:6};
-  const left = {x:20, y:(H-90)/2, dy:0, score:0};
-  const right = {x:W-20-12, y:(H-90)/2, dy:0, score:0};
-  const ball = {x:W/2, y:H/2, r:9, vx:5, vy:3};
+const Config = {
+  canvas: { width: 800, height: 500 },
+  paddle: { width: 12, height: 100, speed: 7 },
+  ball: { radius: 10, baseSpeedX: 5, maxRandomY: 2, spinFactor: 0.28, speedupFactor: 1.06, maxSpeedX: 18 },
+  rules: { winningScore: 10 },
+  keys: { p1Up: 'w', p1Down: 's', p2Up: 'i', p2Down: 'k', pause: ' ' },
+  visuals: { bg: '#061426', fg: '#e6f7ff', text: '#e6f7ff', gameOver: '#ff4d4f', win: '#ffe66d', centerLine: '#2b728f' },
+  ai: { enabled: true, difficulty: 0.9 }, // difficulty: 0 (easy) to 1 (perfect)
+  powerups: { spawnInterval: 8000, duration: 6000, size: 18 }
+};
 
-  let paused = true;
+class Vector2 { constructor(x=0,y=0){this.x=x;this.y=y;} }
 
-  const modeSelect = document.getElementById('mode');
-  const speedSelect = document.getElementById('speed');
-  const status = document.getElementById('status');
+class Paddle {
+  constructor(x,y,w,h,s,bh){ this.position=new Vector2(x,y); this.width=w; this.height=h; this.speed=s; this.boundsHeight=bh; }
+  move(dy){ this.position.y = Math.min(this.boundsHeight - this.height, Math.max(0, this.position.y + dy)); }
+  rect(){ return { x:this.position.x, y:this.position.y, w:this.width, h:this.height }; }
+}
 
-  function resetBall(winner){
-    ball.x = W/2;
-    ball.y = H/2;
+class Ball {
+  constructor(radius,bw,bh){ this.radius=radius; this.boundsWidth=bw; this.boundsHeight=bh; this.position=new Vector2(); this.velocity=new Vector2(); this.reset(true); }
+  reset(randomDirection=false){ this.position.x = this.boundsWidth/2; this.position.y = this.boundsHeight/2; const dir = randomDirection && Math.random() > 0.5 ? 1 : -1; this.velocity.x = dir * Config.ball.baseSpeedX; this.velocity.y = (Math.random() * (2 * Config.ball.maxRandomY)) - Config.ball.maxRandomY; }
+  update(){ this.position.x += this.velocity.x; this.position.y += this.velocity.y; if(this.position.y + this.radius > this.boundsHeight || this.position.y - this.radius < 0){ this.velocity.y *= -1; } }
+}
 
-    const base = 5 + Math.random() * 3;
-    const angle = (Math.random()*Math.PI/4) - Math.PI/8;
+class Input { constructor(){ this.keys={}; document.addEventListener('keydown', e => { this.keys[e.key] = true; }); document.addEventListener('keyup', e => { this.keys[e.key] = false; }); } isDown(k){ return !!this.keys[k]; } }
 
-    ball.vx = (winner === "left" ? 1 : -1) * base;
-    ball.vy = base * Math.tan(angle);
+class Renderer {
+  constructor(ctx){ this.ctx = ctx; }
+  clear(w,h){ this.ctx.fillStyle = Config.visuals.bg; this.ctx.fillRect(0,0,w,h); }
+  rect(r,color=Config.visuals.fg){ this.ctx.fillStyle=color; this.ctx.fillRect(r.x, r.y, r.w, r.h); }
+  circle(ball,color=Config.visuals.fg){ this.ctx.fillStyle=color; this.ctx.beginPath(); this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI*2); this.ctx.closePath(); this.ctx.fill(); }
+  text(t,x,y,color=Config.visuals.text, size=30){ this.ctx.fillStyle = color; this.ctx.font = size+'px Arial'; this.ctx.fillText(t,x,y); }
+  dashedCenter(w,h){ const ctx=this.ctx; ctx.strokeStyle = Config.visuals.centerLine; ctx.lineWidth = 2; ctx.setLineDash([10,10]); ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke(); ctx.setLineDash([]); }
+}
+
+// Simple WebAudio SFX (score sound and powerup sound)
+class SFX {
+  constructor(){ this.ctx = null; this.gain = null; }
+  _ensure() { if(!this.ctx){ this.ctx = new (window.AudioContext || window.webkitAudioContext)(); this.gain = this.ctx.createGain(); this.gain.connect(this.ctx.destination); this.gain.gain.value = 0.12; } }
+  playTone(freq, time=0.12, type='sine'){ this._ensure(); const o = this.ctx.createOscillator(); o.type = type; o.frequency.value = freq; o.connect(this.gain); o.start(); o.stop(this.ctx.currentTime + time); }
+  score(){ this.playTone(880,0.08,'sine'); setTimeout(()=>this.playTone(660,0.08,'sine'), 90); }
+  power(){ this.playTone(1320,0.12,'triangle'); }
+}
+
+class PowerUp {
+  constructor(x,y,type,size){ this.x=x; this.y=y; this.type=type; this.size=size; this.active=true; }
+  rect(){ return { x:this.x - this.size/2, y:this.y - this.size/2, w:this.size, h:this.size }; }
+}
+
+class Game {
+  constructor(canvasEl, restartBtn){
+    this.canvas = canvasEl; this.ctx = canvasEl.getContext('2d'); this.renderer = new Renderer(this.ctx); this.input = new Input();
+    const { width, height, speed } = Config.paddle;
+    this.paddleLeft = new Paddle(8, (Config.canvas.height - height)/2, width, height, speed, Config.canvas.height);
+    this.paddleRight = new Paddle(Config.canvas.width - width - 8, (Config.canvas.height - height)/2, width, height, speed, Config.canvas.height);
+    this.ball = new Ball(Config.ball.radius, Config.canvas.width, Config.canvas.height);
+    this.scores = { p1:0, p2:0 };
+    this.gameOver=false; this.paused=false; this.aiEnabled = Config.ai.enabled; this.restartBtn = restartBtn; this.restartBtn.addEventListener('click', ()=>this.restart());
+    this.sfx = new SFX();
+
+    // Powerups
+    this.powerups = []; this.lastPowerSpawn = performance.now();
+
+    // Win countdown
+    this.winCountdown = -1; // seconds remaining
+
+    // Bind loop
+    this.loop = this.loop.bind(this);
+
+    // Pause toggle
+    document.addEventListener('keydown', e => { if(e.key === Config.keys.pause) { this.togglePause(); } });
   }
 
-  function drawRect(x,y,w,h,fill){ ctx.fillStyle = fill; ctx.fillRect(x,y,w,h); }
-  function drawCircle(x,y,r,fill){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle = fill; ctx.fill(); }
+  togglePause(){ if(this.gameOver) return; this.paused = !this.paused; if(!this.paused) { /* continue */ } }
 
-  function drawNet(){
-    for(let i=10; i<H; i+=22){
-      drawRect(W/2 - 1, i, 2, 12, "#2ec4b6");
-    }
+  handleInput(){ if(this.gameOver || this.paused) return;
+    // Player 1
+    if(this.input.isDown(Config.keys.p1Up)) this.paddleLeft.move(-this.paddleLeft.speed);
+    if(this.input.isDown(Config.keys.p1Down)) this.paddleLeft.move(this.paddleLeft.speed);
+
+    // Player 2: either human or AI
+    if(this.aiEnabled){ this._handleAI(); }
+    else { if(this.input.isDown(Config.keys.p2Up)) this.paddleRight.move(-this.paddleRight.speed); if(this.input.isDown(Config.keys.p2Down)) this.paddleRight.move(this.paddleRight.speed); }
   }
 
-  function draw(){
-    ctx.fillStyle = "#0b1220";
-    ctx.fillRect(0,0,W,H);
-
-    drawNet();
-    drawRect(left.x, left.y, paddle.w, paddle.h, "#f0f3bd");
-    drawRect(right.x, right.y, paddle.w, paddle.h, "#f0f3bd");
-    drawCircle(ball.x, ball.y, ball.r, "#ff6b6b");
-
-    ctx.fillStyle = "#c9d6df";
-    ctx.font = "28px monospace";
-    ctx.fillText(left.score, W*0.25, 40);
-    ctx.fillText(right.score, W*0.75, 40);
-
-    status.textContent = paused ? "Paused — press Space to start" : "Running — press Space to pause";
+  _handleAI(){ // simple tracking AI with difficulty multiplier
+    const centerY = this.paddleRight.position.y + this.paddleRight.height/2;
+    // compute ideal movement direction
+    const dir = (this.ball.position.y - centerY);
+    const moveAmt = this.paddleRight.speed * Config.ai.difficulty;
+    if(Math.abs(dir) > 10){ this.paddleRight.move(Math.sign(dir) * moveAmt); }
   }
 
-  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+  update(){ if(this.gameOver || this.paused) return; this.ball.update();
+    // Paddle collisions
+    const hitLeft = this.ball.position.x - this.ball.radius < this.paddleLeft.width + this.paddleLeft.position.x &&
+      this.ball.position.y > this.paddleLeft.position.y && this.ball.position.y < this.paddleLeft.position.y + this.paddleLeft.height;
+    if(hitLeft){ this.ball.velocity.x = Math.abs(this.ball.velocity.x) * Config.ball.speedupFactor; this.ball.velocity.x *= -1; const delta = this.ball.position.y - (this.paddleLeft.position.y + this.paddleLeft.height/2); this.ball.velocity.y = delta * Config.ball.spinFactor; if(Math.abs(this.ball.velocity.x) > Config.ball.maxSpeedX) this.ball.velocity.x = -Math.sign(this.ball.velocity.x) * Config.ball.maxSpeedX; }
 
-  function update(){
-    if(paused) return;
+    const hitRight = this.ball.position.x + this.ball.radius > this.paddleRight.position.x &&
+      this.ball.position.y > this.paddleRight.position.y && this.ball.position.y < this.paddleRight.position.y + this.paddleRight.height;
+    if(hitRight){ this.ball.velocity.x = -Math.abs(this.ball.velocity.x) * Config.ball.speedupFactor; const delta = this.ball.position.y - (this.paddleRight.position.y + this.paddleRight.height/2); this.ball.velocity.y = delta * Config.ball.spinFactor; if(Math.abs(this.ball.velocity.x) > Config.ball.maxSpeedX) this.ball.velocity.x = -Math.sign(this.ball.velocity.x) * Config.ball.maxSpeedX; }
 
-    const SPEED = Number(speedSelect.value);
-
-    // Move paddles (scaled)
-    left.y += left.dy * SPEED;
-    right.y += right.dy * SPEED;
-
-    left.y = clamp(left.y, 0, H - paddle.h);
-    right.y = clamp(right.y, 0, H - paddle.h);
-
-    // AI movement
-    if(modeSelect.value === "pvai"){
-      const target = ball.y - paddle.h/2;
-      const diff = target - right.y;
-
-      right.dy = clamp(diff * 0.08 * SPEED, -paddle.speed * SPEED, paddle.speed * SPEED);
-      right.y += right.dy;
-    }
-
-    // Ball movement (scaled)
-    ball.x += ball.vx * SPEED;
-    ball.y += ball.vy * SPEED;
-
-    // Wall collisions
-    if(ball.y - ball.r < 0){
-      ball.y = ball.r;
-      ball.vy *= -1;
-    }
-    if(ball.y + ball.r > H){
-      ball.y = H - ball.r;
-      ball.vy *= -1;
-    }
-
-    // LEFT paddle hit
-    if(ball.x - ball.r < left.x + paddle.w && ball.x - ball.r > left.x){
-      if(ball.y > left.y && ball.y < left.y + paddle.h){
-        const rel = (ball.y - (left.y + paddle.h/2)) / (paddle.h/2);
-        const speed = (Math.hypot(ball.vx, ball.vy) + 0.4) * SPEED;
-        const angle = rel * Math.PI/3;
-
-        ball.vx = Math.abs(Math.cos(angle) * speed);
-        ball.vy = Math.sin(angle) * speed;
-      }
-    }
-
-    // RIGHT paddle hit
-    if(ball.x + ball.r > right.x && ball.x + ball.r < right.x + paddle.w){
-      if(ball.y > right.y && ball.y < right.y + paddle.h){
-        const rel = (ball.y - (right.y + paddle.h/2)) / (paddle.h/2);
-        const speed = (Math.hypot(ball.vx, ball.vy) + 0.4) * SPEED;
-        const angle = rel * Math.PI/3;
-
-        ball.vx = -Math.abs(Math.cos(angle) * speed);
-        ball.vy = Math.sin(angle) * speed;
-      }
-    }
+    // Powerup collision with ball
+    for(let i=this.powerups.length-1;i>=0;i--){ const p = this.powerups[i]; if(!p.active) continue; if(this._circleRectCollision(this.ball, p.rect())){ this._applyPowerup(p); this.powerups.splice(i,1); this.sfx.power(); } }
 
     // Scoring
-    if(ball.x < 0){
-      right.score++;
-      resetBall("right");
-      paused = true;
-    }
-    if(ball.x > W){
-      left.score++;
-      resetBall("left");
-      paused = true;
-    }
+    if(this.ball.position.x - this.ball.radius < 0){ this.scores.p2++; this.sfx.score(); if(this.checkWin()) return; this.ball.reset(true); }
+    else if(this.ball.position.x + this.ball.radius > Config.canvas.width){ this.scores.p1++; this.sfx.score(); if(this.checkWin()) return; this.ball.reset(true); }
+
+    // Spawn powerups periodically
+    const now = performance.now(); if(now - this.lastPowerSpawn > Config.powerups.spawnInterval){ this._spawnPowerup(); this.lastPowerSpawn = now; }
   }
 
-  // Keyboard controls
-  document.addEventListener("keydown", e=>{
-    if(e.key === "w") left.dy = -paddle.speed;
-    if(e.key === "s") left.dy = paddle.speed;
-    if(e.key === "ArrowUp") right.dy = -paddle.speed;
-    if(e.key === "ArrowDown") right.dy = paddle.speed;
+  _circleRectCollision(ball, rect){ const cx = ball.position.x; const cy = ball.position.y; const rx = rect.x; const ry = rect.y; const rw = rect.w; const rh = rect.h; const nearestX = Math.max(rx, Math.min(cx, rx+rw)); const nearestY = Math.max(ry, Math.min(cy, ry+rh)); const dx = cx - nearestX; const dy = cy - nearestY; return (dx*dx + dy*dy) < (ball.radius * ball.radius); }
 
-    if(e.code === "Space") paused = !paused;
-  });
+  _spawnPowerup(){ // spawn near center random Y
+    const x = Math.random() < 0.5 ? Config.canvas.width * 0.25 : Config.canvas.width * 0.75; const y = 40 + Math.random() * (Config.canvas.height - 80);
+    const types = ['bigPaddle','fastBall']; const type = types[Math.floor(Math.random()*types.length)]; this.powerups.push(new PowerUp(x,y,type, Config.powerups.size)); }
 
-  document.addEventListener("keyup", e=>{
-    if(e.key === "w" || e.key === "s") left.dy = 0;
-    if(e.key === "ArrowUp" || e.key === "ArrowDown") right.dy = 0;
-  });
-
-  document.getElementById("restart").onclick = () => {
-    left.score = 0;
-    right.score = 0;
-    resetBall("left");
-    paused = true;
-  };
-
-  function loop(){
-    update();
-    draw();
-    requestAnimationFrame(loop);
+  _applyPowerup(pu){ if(pu.type === 'bigPaddle'){ // make the paddle that last hit ball bigger temporarily
+      // Decide which player gets benefit — the side the ball was moving toward when collected
+      const target = this.ball.velocity.x > 0 ? this.paddleRight : this.paddleLeft; target.height *= 1.4; setTimeout(()=>{ target.height = Math.max(40, target.height / 1.4); }, Config.powerups.duration);
+    } else if(pu.type === 'fastBall'){ const prev = this.ball.velocity.x; this.ball.velocity.x *= 1.6; setTimeout(()=>{ this.ball.velocity.x = (this.ball.velocity.x > 0 ? Math.abs(prev) : -Math.abs(prev)); }, Config.powerups.duration); }
   }
 
-  loop();
-})();
+  checkWin(){ if(this.scores.p1 >= Config.rules.winningScore || this.scores.p2 >= Config.rules.winningScore){ this.gameOver = true; this.restartBtn.style.display = 'inline-block'; // start countdown to auto-restart
+      this.winCountdown = 5; // seconds
+      // start countdown timer
+      const tick = () => { if(this.winCountdown <= 0) { this.restart(); return; } this.winCountdown -= 1; setTimeout(tick, 1000); };
+      setTimeout(tick, 1000);
+      return true; } return false; }
+
+  draw(){ this.renderer.clear(Config.canvas.width, Config.canvas.height); this.renderer.dashedCenter(Config.canvas.width, Config.canvas.height); // paddles
+    this.renderer.rect(this.paddleLeft.rect()); this.renderer.rect(this.paddleRight.rect()); // ball
+    this.renderer.circle(this.ball);
+    // powerups
+    for(const p of this.powerups){ if(!p.active) continue; this.ctx.fillStyle = p.type === 'bigPaddle' ? '#9ad3bc' : '#ffb86b'; const r = p.rect(); this.ctx.fillRect(r.x, r.y, r.w, r.h); }
+
+    // scores
+    this.renderer.text(this.scores.p1, Config.canvas.width/4, 50); this.renderer.text(this.scores.p2, 3*Config.canvas.width/4, 50);
+
+    // paused overlay
+    if(this.paused){ this.renderer.text('PAUSED', Config.canvas.width/2 - 70, Config.canvas.height/2, '#ffd166', 42); }
+
+    // Game over / win display
+    if(this.gameOver){ this.renderer.text('Game Over', Config.canvas.width/2 - 100, Config.canvas.height/2 - 40, Config.visuals.gameOver, 36); const msg = this.scores.p1 >= Config.rules.winningScore ? 'Player 1 Wins!' : 'Player 2 Wins!'; this.renderer.text(msg, Config.canvas.width/2 - 120, Config.canvas.height/2, Config.visuals.win, 32); if(this.winCountdown > 0){ this.renderer.text('Restarting in ' + Math.ceil(this.winCountdown) + '...', Config.canvas.width/2 - 120, Config.canvas.height/2 + 50, Config.visuals.text, 22); } }
+  }
+
+  restart(){ this.scores.p1 = 0; this.scores.p2 = 0; this.paddleLeft.height = Config.paddle.height; this.paddleRight.height = Config.paddle.height; this.paddleLeft.position.y = (Config.canvas.height - this.paddleLeft.height)/2; this.paddleRight.position.y = (Config.canvas.height - this.paddleRight.height)/2; this.ball.reset(true); this.gameOver=false; this.paused=false; this.powerups = []; this.restartBtn.style.display = 'none'; this.winCountdown = -1; }
+
+  loop(){ this.handleInput(); this.update(); this.draw(); requestAnimationFrame(this.loop); }
+}
+
+// Boot
+const canvas = document.getElementById('pongCanvas'); const restartBtn = document.getElementById('restartBtn'); canvas.width = Config.canvas.width; canvas.height = Config.canvas.height; const game = new Game(canvas, restartBtn); game.loop();
+
+// Controls hint: W/S for left player; I/K for right player (if human); Space to pause/resume; Restart button appears on win.
+
 </script>
