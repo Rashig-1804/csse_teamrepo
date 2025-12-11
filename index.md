@@ -109,8 +109,7 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
       Memory 
     </div>
   </a>
-
-
+  
 </div>
 
 <br>
