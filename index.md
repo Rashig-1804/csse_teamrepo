@@ -91,7 +91,7 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
 
   
   <a href="{{ site.baseurl }}/memory" style="text-decoration: none;">
-    <div style="background-color: #4d430b34; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+    <div style="background-color: #12fc4cde; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
       Memory Game
     </div>
   </a>
