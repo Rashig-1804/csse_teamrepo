@@ -20,6 +20,13 @@ permalink: /memory
     }
 </style>
 
+<canvas id="memoryCanvas" width="800" height="600"></canvas>
+
+<div style="text-align: center; margin-top: 20px;">
+  <h2>Memory Game</h2>
+  <p>Score: <span class="score">0</span></p>
+  <p>Attempts: <span class="attempts">0</span></p>
+</div>
 
 <script>
     // Get canvas and context for drawing
