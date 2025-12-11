@@ -57,9 +57,6 @@ permalink: /pong
   const speedSelect = document.getElementById('speed');
   const status = document.getElementById('status');
 
-  // track pressed keys so simultaneous keys work reliably
-  const keys = {};
-
   function resetBall(winner){
     ball.x = W/2;
     ball.y = H/2;
@@ -99,28 +96,10 @@ permalink: /pong
 
   function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 
-  function handleInput() {
-    // left paddle (W/S)
-    if (keys['w']) left.dy = -paddle.speed;
-    else if (keys['s']) left.dy = paddle.speed;
-    else left.dy = 0;
-
-    // right paddle (ArrowUp/ArrowDown) - only if PvP
-    if (modeSelect.value === 'pvp') {
-      if (keys['arrowup']) right.dy = -paddle.speed;
-      else if (keys['arrowdown']) right.dy = paddle.speed;
-      else right.dy = 0;
-    }
-    // if PvAI, right.dy will be set by AI in update()
-  }
-
   function update(){
     if(paused) return;
 
     const SPEED = Number(speedSelect.value);
-
-    // process keyboard input into dy values
-    handleInput();
 
     // Move paddles (scaled)
     left.y += left.dy * SPEED;
@@ -129,15 +108,13 @@ permalink: /pong
     left.y = clamp(left.y, 0, H - paddle.h);
     right.y = clamp(right.y, 0, H - paddle.h);
 
-    // AI movement (only when PvAI)
+    // AI movement
     if(modeSelect.value === "pvai"){
       const target = ball.y - paddle.h/2;
       const diff = target - right.y;
 
-      // scaled by SPEED so AI keeps up with ball
       right.dy = clamp(diff * 0.08 * SPEED, -paddle.speed * SPEED, paddle.speed * SPEED);
       right.y += right.dy;
-      right.y = clamp(right.y, 0, H - paddle.h);
     }
 
     // Ball movement (scaled)
@@ -191,32 +168,19 @@ permalink: /pong
     }
   }
 
-  // Keyboard controls (robust)
+  // Keyboard controls
   document.addEventListener("keydown", e=>{
-    const key = (e.key || '').toLowerCase();
+    if(e.key === "w") left.dy = -paddle.speed;
+    if(e.key === "s") left.dy = paddle.speed;
+    if(e.key === "ArrowUp") right.dy = -paddle.speed;
+    if(e.key === "ArrowDown") right.dy = paddle.speed;
 
-    // normalize arrow keys to 'arrowup' / 'arrowdown'
-    const name = key.startsWith('arrow') ? key : key;
-
-    keys[name] = true;
-
-    // Space toggles pause — prevent default page scrolling
-    if (e.code === 'Space' || key === ' ') {
-      e.preventDefault();
-      paused = !paused;
-    }
-  }, {passive: false});
-
-  document.addEventListener("keyup", e=>{
-    const key = (e.key || '').toLowerCase();
-    const name = key.startsWith('arrow') ? key : key;
-    keys[name] = false;
+    if(e.code === "Space") paused = !paused;
   });
 
-  // Also clear keys if window loses focus (prevents stuck keys)
-  window.addEventListener('blur', () => {
-    for (let k in keys) keys[k] = false;
-    left.dy = right.dy = 0;
+  document.addEventListener("keyup", e=>{
+    if(e.key === "w" || e.key === "s") left.dy = 0;
+    if(e.key === "ArrowUp" || e.key === "ArrowDown") right.dy = 0;
   });
 
   document.getElementById("restart").onclick = () => {
