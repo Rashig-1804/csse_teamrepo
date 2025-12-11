@@ -109,7 +109,13 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
       Memory 
     </div>
   </a>
-  
+
+  <a href="{{ site.baseurl }}/breakout" style="text-decoration: none;">
+    <div style="background-color: #fdfa4dff; color: black; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Breakout 
+    </div>
+  </a>
+
 </div>
 
 <br>
