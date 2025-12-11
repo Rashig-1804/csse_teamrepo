@@ -78,6 +78,7 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
       Connect 4
     </div>
   </a>
+<<<<<<< HEAD
 
   <a href="{{ site.baseurl }}/pong" style="text-decoration: none;">
     <div style="background-color: #ca1818ff; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
@@ -91,6 +92,28 @@ Hi! We are a team, working together to code games and projects, such as Snake Ga
     </div>
   </a>
 
+
+</div>
+=======
+>>>>>>> 2d3495c (fix buttons)
+
+  <a href="{{ site.baseurl }}/ping/" style="text-decoration: none;">
+    <div style="background-color: #0099FF; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Ping Pong
+    </div>
+  </a>
+
+  <a href="{{ site.baseurl }}/cookieclicker/" style="text-decoration: none;">
+    <div style="background-color: #FF69B4; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Cookie Clicker
+    </div>
+  </a>
+
+  <a href="{{ site.baseurl }}/rockpaper/" style="text-decoration: none;">
+    <div style="background-color: #8A2BE2; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+      Rock Paper Scissors
+    </div>
+  </a>
 
 </div>
 
