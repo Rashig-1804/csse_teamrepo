@@ -1,12 +1,3 @@
----
-layout: opencs
-title: Cookie Clicker
-description: Use JavaScript to code a cookie clicker game
-permalink: /cookie
----
-
-//@ts-check
-
 const shopContainer = document.getElementById("shop-container");
 const cookieButton = document.getElementById("cookie");
 const cookieCountDisplay = document.getElementById("cookie-count");
