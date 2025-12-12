@@ -387,6 +387,41 @@ permalink: /breakout
       }
   }
 
+  // ExplosiveBrick class - destroys nearby bricks when destroyed
+  class ExplosiveBrick extends Brick {
+      constructor(x, y, width = 75, height = 20) {
+          super(x, y, width, height);
+          this.color = "#ff3b30"; // distinctive explosive color
+          this.baseColor = this.color;
+          this.hasPowerUp = false; // explosive bricks don't include power-ups
+          this.explosionRadius = 90; // pixels
+      }
+
+      // Explode and destroy nearby bricks (accepts game instance)
+      explodeNearby(game) {
+          const cx = this.x + this.width / 2;
+          const cy = this.y + this.height / 2;
+          for (let other of game.bricks) {
+              if (!other.isActive()) continue;
+              if (other === this) continue; // skip self
+              const ocx = other.x + other.width / 2;
+              const ocy = other.y + other.height / 2;
+              const d = Math.hypot(ocx - cx, ocy - cy);
+              if (d <= this.explosionRadius) {
+                  other.destroy();
+                  game.score++;
+                  if (other.hasPowerUp) {
+                      game.powerUps.push(new PowerUp(other.x + other.width / 2, other.y));
+                  }
+                  // chain reaction for other explosive bricks
+                  if (other instanceof ExplosiveBrick) {
+                      other.explodeNearby(game);
+                  }
+              }
+          }
+      }
+  }
+
   // PowerUp class - falling power-ups with effects
   class PowerUp extends GameObject {
       constructor(x, y) {
@@ -551,8 +586,18 @@ permalink: /breakout
               for (let r = 0; r < this.brickRows; r++) {
                   const x = c * (75 + this.brickPadding) + this.brickOffsetLeft;
                   const y = r * (20 + this.brickPadding) + this.brickOffsetTop;
-                  const brick = new Brick(x, y);
-                  brick.setColor(this.defaultBrickColor);
+                  // Occasionally create an ExplosiveBrick instead of a regular Brick
+                  const makeExplosive = Math.random() < 0.12; // ~12% chance
+                  let brick;
+                  if (makeExplosive) {
+                      brick = new ExplosiveBrick(x, y);
+                  } else {
+                      brick = new Brick(x, y);
+                  }
+                  // Apply user-selected color/gradient but keep special bricks' colors intact
+                  if (!(brick instanceof ExplosiveBrick) && !brick.hasPowerUp) {
+                      brick.setColor(this.defaultBrickColor);
+                  }
                   brick.setGradient(this.brickGradient);
                   this.bricks.push(brick);
               }
@@ -598,7 +643,9 @@ permalink: /breakout
           this.ball.setColor(this.defaultBallColor);
           this.paddle.setColor(this.defaultPaddleColor);
           for (let b of this.bricks) {
-              b.setColor(this.defaultBrickColor);
+              if (!(b instanceof ExplosiveBrick) && !b.hasPowerUp) {
+                  b.setColor(this.defaultBrickColor);
+              }
               b.setGradient(this.brickGradient);
           }
           this.draw();
@@ -632,6 +679,10 @@ permalink: /breakout
                   
                   if (brick.hasPowerUp) {
                       this.powerUps.push(new PowerUp(brick.x + brick.width / 2, brick.y));
+                  }
+                  // Trigger explosive brick behavior
+                  if (brick instanceof ExplosiveBrick) {
+                      brick.explodeNearby(this);
                   }
               }
           }
