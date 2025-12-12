@@ -485,7 +485,17 @@ const x2Click = {
   itemEffected: "click",
   multiplier: 2,
 };
+
+const x4Click = {
+  name: "4X Clicks",
+  emoji: "🖱🖱",
+  price: 500,
+  itemEffected: "click",
+  multiplier: 4,
+};
+
 shop.upgrades.push(x2Click);
+shop.upgrades.push(x4Click);
 
 shop.addItemForSale(grandma);
 shop.addItemForSale(factory);
