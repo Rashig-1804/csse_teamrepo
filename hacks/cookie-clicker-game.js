@@ -476,6 +476,7 @@ shopItems.push(grandma);
 shopItems.push(factory);
 shopItems.push(mangotemple);
 shopItems.push(bank);
+shopItems.push(grandpa);
 
 const x2Click = {
   name: "2X Clicks",
@@ -490,6 +491,8 @@ shop.addItemForSale(grandma);
 shop.addItemForSale(factory);
 shop.addItemForSale(mangotemple);
 shop.addItemForSale(bank);
+// Register Grandpa with the shop display as well
+shop.addItemForSale(grandpa);
 gameLoop.fetchSavedData();
 cookie.fetchStoredCookies();
 cookieButton.addEventListener("click", () => {
@@ -505,3 +508,26 @@ cookieButton.addEventListener("click", () => {
   gameLoop.getAmount("MangoTemple");
   gameLoop.getAmount("Bank");
 });
+
+// Wire up the static "Grandpa" button in the markup (id="coolbutton")
+const grandpaBtn = document.getElementById("coolbutton");
+if (grandpaBtn) {
+  addButtonTooltip(grandpaBtn);
+  grandpaBtn.addEventListener("click", () => {
+    // Find the dynamic shop entry for Grandpa (if present)
+    const idx = shop.forSale.findIndex((it) => it.name === grandpa.name);
+    const price = idx >= 0 ? shop.forSale[idx].price : grandpa.price;
+    if (cookie.cookies < price) {
+      alert("Insufficient Cookies");
+      return;
+    }
+    cookie.addCookies(-price);
+    gameLoop.addAutoClicker(grandpa.name, grandpa.cookiesPerSecond);
+    if (idx >= 0) {
+      shop.updateForSalePrice(
+        Math.floor(shop.forSale[idx].originalPrice * (gameLoop.getAmount(grandpa.name) + 1)),
+        idx,
+      );
+    }
+  });
+}
