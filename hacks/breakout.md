@@ -154,7 +154,7 @@ permalink: /breakout
           this.radius = radius;
           this.dx = 2;
           this.dy = -2;
-          this.color = "#0095DD";
+          this.color = "#e91aa4ff";
       }
       
       draw(ctx) {
