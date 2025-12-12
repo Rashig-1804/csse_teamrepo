@@ -14,7 +14,12 @@ permalink: /cookie-clicker-game/
 
       <!-- Upgrade buttons with costs -->
       <button id="autoClickerBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 mb-2">
-        👵Grandma (Cost: 69)
+        👵Grandma (Cost: 70)
+      </button>
+
+      <button id="coolbutton" 
+          class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 mb-2 rounded shadow">
+        👴Grandpa (Cost: 80)
       </button>
 
       <button id="cursorBtn"
@@ -63,7 +68,7 @@ permalink: /cookie-clicker-game/
       <div id="cookie" 
           class="relative z-10 w-48 h-48 bg-cover bg-center rounded-full cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-transform duration-200 ease-out flex items-center justify-center bg-amber-200 border-4 border-amber-400">
           <!-- Cookie image -->
-          <img src="{{site.baseurl}}/hacks/cookie-clicker/assets/baseCookie.png" class="w-full h-full rounded-full select-none pointer-events-none" />
+          <img src="{{site.baseurl}}/images/baseCookie.png" class="w-full h-full rounded-full select-none pointer-events-none" />
       </div>
 
       <!-- Bottom section (Lesson/Docs link) -->
@@ -81,4 +86,4 @@ permalink: /cookie-clicker-game/
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Game logic script (external JS file) -->
-<script src="{{site.baseurl}}/hacks/cookie-clicker/cookie-clicker-game.js"></script>
+<script src="{{site.baseurl}}/hacks/cookie-clicker-game.js"></script>

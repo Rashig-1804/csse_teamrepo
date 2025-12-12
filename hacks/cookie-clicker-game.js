@@ -430,10 +430,18 @@ class EmojiBuddy {
   }
 }
 
+const grandpa = {
+  name: "Grandpa",
+  emoji: "👴",
+  price: 80,
+  priceIncrementer: 1.1,
+  cookiesPerSecond: 3,
+};
+
 const grandma = {
   name: "Grandma",
   emoji: "👵",
-  price: 69,
+  price: 70,
   priceIncrementer: 1.5,
   cookiesPerSecond: 1,
 };
