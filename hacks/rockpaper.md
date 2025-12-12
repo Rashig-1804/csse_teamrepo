@@ -1,6 +1,6 @@
 ---
 layout: opencs
-title: Rock Paper Scissors Game
+title: Rock Paper Scissors
 description: Playing rock paper scissors using javascript code
 permalink: /rockpaper
 ---
