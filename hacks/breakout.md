@@ -39,6 +39,13 @@ permalink: /breakout
     <button id="nextLevelBtn" style="display:none;margin:10px auto 0;padding:10px 16px;font-family:system-ui,Arial;font-size:16px;font-weight:600;border:1px solid #222;background:#fff;cursor:pointer;border-radius:8px;color:#111 !important;">Next Level ▶</button>
 </div>
 
+<!-- Color Pickers -->
+<div class="controls" style="text-align: center; margin: 12px 0;">
+    <label style="margin-right:10px; font-weight:600;">Ball Color: <input id="ballColorPicker" type="color" value="#e91aa4" style="margin-left:6px;"/></label>
+    <label style="margin-right:10px; font-weight:600;">Brick Color: <input id="brickColorPicker" type="color" value="#0095DD" style="margin-left:6px;"/></label>
+    <label style="font-weight:600;">Brick Gradient: <input id="brickGradientToggle" type="checkbox" checked style="margin-left:6px;"/></label>
+</div>
+
 <!-- Hack Challenges Section -->
 <div id="hack1" style="max-width:600px;margin:8px auto;font-family:system-ui,Arial;">
     <p class="back-button"><a href="{{site.baseurl}}/hacks" style="text-decoration:none;color:#007acc;font-weight:bold;">Click here to go back to main page</a></p>
@@ -131,6 +138,55 @@ permalink: /breakout
 </div>
 
 <script>
+  // Helper color utility functions
+  function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) {
+          hex = hex.split('').map((c) => c + c).join('');
+      }
+      const bigint = parseInt(hex, 16);
+      return {
+          r: (bigint >> 16) & 255,
+          g: (bigint >> 8) & 255,
+          b: bigint & 255,
+      };
+  }
+
+  function rgbToHex(r, g, b) {
+      return (
+          '#' +
+          [r, g, b]
+              .map((n) => {
+                  const hex = n.toString(16);
+                  return hex.length === 1 ? '0' + hex : hex;
+              })
+              .join('')
+      );
+  }
+
+  function darkenColor(color, percent) {
+      // Accepts hex or rgb string; normalize to hex
+      const ctxForParse = document.createElement('canvas').getContext('2d');
+      ctxForParse.fillStyle = color;
+      const computed = ctxForParse.fillStyle; // normalized hex
+      let hex = computed;
+      if (hex.startsWith('rgb')) {
+          // parse rgb(r,g,b)
+          const nums = hex.match(/\d+/g).map(Number);
+          return rgbToHex(
+              Math.max(0, Math.floor(nums[0] * (1 - percent / 100))),
+              Math.max(0, Math.floor(nums[1] * (1 - percent / 100))),
+              Math.max(0, Math.floor(nums[2] * (1 - percent / 100)))
+          );
+      }
+      hex = hex.replace('#', '');
+      const { r, g, b } = hexToRgb('#' + hex);
+      return rgbToHex(
+          Math.max(0, Math.floor(r * (1 - percent / 100))),
+          Math.max(0, Math.floor(g * (1 - percent / 100))),
+          Math.max(0, Math.floor(b * (1 - percent / 100)))
+      );
+  }
   // Base GameObject class - provides common functionality
   class GameObject {
       constructor(x, y) {
@@ -154,7 +210,7 @@ permalink: /breakout
           this.radius = radius;
           this.dx = 2;
           this.dy = -2;
-          this.color = "#e91aa4ff";
+          this.color = "#e91aa4";
       }
       
       draw(ctx) {
@@ -193,6 +249,10 @@ permalink: /breakout
           const theta = Math.atan2(this.dy, this.dx);
           this.dx = currentSpeed * Math.cos(theta);
           this.dy = currentSpeed * Math.sin(theta);
+      }
+
+      setColor(newColor) {
+          this.color = newColor;
       }
       
       collidesWith(obj) {
@@ -264,6 +324,10 @@ permalink: /breakout
       resetPowerUp() {
           this.width = this.baseWidth;
       }
+
+      setColor(newColor) {
+          this.color = newColor;
+      }
   }
 
   // Brick class - individual brick with power-up capability
@@ -274,20 +338,29 @@ permalink: /breakout
           this.height = height;
           this.status = 1; // 1 = active, 0 = destroyed
           this.hasPowerUp = Math.random() < 0.3; // 30% chance
-          this.color = this.hasPowerUp ? "gold" : "#0095DD";
+          this.baseColor = this.hasPowerUp ? "gold" : "#0095DD";
+          this.color = this.baseColor;
+          this.useGradient = false;
       }
       
       draw(ctx) {
           if (this.status === 1) {
               ctx.beginPath();
               ctx.rect(this.x, this.y, this.width, this.height);
-              
+              let fillStyle = this.color;
+              if (this.useGradient) {
+                  const grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+                  grad.addColorStop(0, this.color);
+                  grad.addColorStop(1, darkenColor(this.color, 20));
+                  fillStyle = grad;
+              }
+
               if (this.hasPowerUp) {
-                  ctx.fillStyle = this.color;
+                  ctx.fillStyle = fillStyle;
                   ctx.shadowColor = "orange";
                   ctx.shadowBlur = 10;
               } else {
-                  ctx.fillStyle = this.color;
+                  ctx.fillStyle = fillStyle;
                   ctx.shadowBlur = 0;
               }
               
@@ -302,6 +375,15 @@ permalink: /breakout
       
       isActive() {
           return this.status === 1;
+      }
+
+      setColor(newColor) {
+          this.color = newColor;
+          this.baseColor = newColor;
+      }
+
+      setGradient(enabled) {
+          this.useGradient = enabled;
       }
   }
 
@@ -387,6 +469,12 @@ permalink: /breakout
           this.activePowerUp = null;
           this.powerUpTimer = 0;
           this.powerUpDuration = 5000; // 5 seconds
+
+          // Default colors and gradient settings
+          this.defaultBallColor = "#e91aa4";
+          this.defaultBrickColor = "#0095DD";
+          this.defaultPaddleColor = "#0095DD";
+          this.brickGradient = true;
           
           // Brick configuration
           this.brickRows = 4;
@@ -397,6 +485,10 @@ permalink: /breakout
           
           this.setupEventListeners();
           this.initBricks();
+
+          // Apply default colors for existing objects
+          this.ball.setColor(this.defaultBallColor);
+          this.paddle.setColor(this.defaultPaddleColor);
       }
       
       setupEventListeners() {
@@ -428,6 +520,29 @@ permalink: /breakout
           document.getElementById("pauseBtn").addEventListener("click", () => this.togglePause());
           document.getElementById("resetBtn").addEventListener("click", () => this.reset());
           document.getElementById("nextLevelBtn").addEventListener("click", () => this.nextLevel());
+
+          // Color pickers
+          const ballPicker = document.getElementById('ballColorPicker');
+          const brickPicker = document.getElementById('brickColorPicker');
+          const brickGradToggle = document.getElementById('brickGradientToggle');
+
+          ballPicker.addEventListener('input', (e) => {
+              this.ball.setColor(e.target.value);
+          });
+
+          brickPicker.addEventListener('input', (e) => {
+              this.defaultBrickColor = e.target.value;
+              for (let b of this.bricks) {
+                  b.setColor(this.defaultBrickColor);
+              }
+          });
+
+          brickGradToggle.addEventListener('change', (e) => {
+              this.brickGradient = e.target.checked;
+              for (let b of this.bricks) {
+                  b.setGradient(this.brickGradient);
+              }
+          });
       }
       
       initBricks() {
@@ -436,7 +551,10 @@ permalink: /breakout
               for (let r = 0; r < this.brickRows; r++) {
                   const x = c * (75 + this.brickPadding) + this.brickOffsetLeft;
                   const y = r * (20 + this.brickPadding) + this.brickOffsetTop;
-                  this.bricks.push(new Brick(x, y));
+                  const brick = new Brick(x, y);
+                  brick.setColor(this.defaultBrickColor);
+                  brick.setGradient(this.brickGradient);
+                  this.bricks.push(brick);
               }
           }
       }
@@ -476,7 +594,13 @@ permalink: /breakout
           document.getElementById("pauseBtn").disabled = true;
           document.getElementById("pauseBtn").textContent = "Pause";
           document.getElementById("nextLevelBtn").style.display = "none";
-          
+          // Re-apply colors and gradients
+          this.ball.setColor(this.defaultBallColor);
+          this.paddle.setColor(this.defaultPaddleColor);
+          for (let b of this.bricks) {
+              b.setColor(this.defaultBrickColor);
+              b.setGradient(this.brickGradient);
+          }
           this.draw();
       }
       
