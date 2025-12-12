@@ -4,7 +4,19 @@ title: Ping Pong
 description: Use JavaScript to code a ping pong game
 permalink: /pong
 ---
-## 🎮 Pong Game Demo (Enhanced)
+
+## 🎮 Pong Game 
+
+<!-- AI Difficulty Dropdown -->
+<div style="text-align:center; margin-top:10px; margin-bottom:10px;">
+  <label for="aiSelect" style="color:white; font-size:18px;">Right Paddle:</label>
+  <select id="aiSelect" style="padding:6px 10px; font-size:16px; border-radius:6px;">
+    <option value="off">Human (I / K)</option>
+    <option value="easy">AI: Easy</option>
+    <option value="medium">AI: Medium</option>
+    <option value="hard">AI: Hard</option>
+  </select>
+</div>
 
 <div class="game-canvas-container" style="text-align:center;">
   <canvas id="pongCanvas" width="800" height="500"></canvas>
@@ -38,7 +50,7 @@ permalink: /pong
 
 <script>
 // =====================================================
-// FIXED VERSION — Player 1 paddle now properly bounces ball
+// FIXED VERSION + AI DROPDOWN SUPPORT
 // =====================================================
 
 // --------------------
@@ -65,8 +77,15 @@ const Config = {
     win: "#ffe66d",
     centerLine: "#2b728f"
   },
-  ai: { enabled: true, difficulty: 0.9 },
-  powerups: { spawnInterval: 8000, duration: 6000, size: 18 }
+  ai: { mode: "off", difficulty: 0 }  // replaced enabled: true
+};
+
+// How strong each difficulty is:
+const AI_SPEED = {
+  off: 0,
+  easy: 0.35,
+  medium: 0.65,
+  hard: 1.0
 };
 
 // --------------------
@@ -83,7 +102,10 @@ class Paddle {
     this.boundsHeight=bh;
   }
   move(dy){
-    this.position.y = Math.max(0, Math.min(this.boundsHeight - this.height, this.position.y + dy));
+    this.position.y = Math.max(
+      0, 
+      Math.min(this.boundsHeight - this.height, this.position.y + dy)
+    );
   }
   rect(){
     return { x:this.position.x, y:this.position.y, w:this.width, h:this.height };
@@ -120,7 +142,7 @@ class Ball {
 
 class Input {
   constructor(){
-    this.keys = {};
+    this.keys={};
     document.addEventListener("keydown", e => this.keys[e.key] = true);
     document.addEventListener("keyup", e => this.keys[e.key] = false);
   }
@@ -130,27 +152,27 @@ class Input {
 class Renderer {
   constructor(ctx){ this.ctx=ctx; }
   clear(w,h){
-    this.ctx.fillStyle = Config.visuals.bg;
+    this.ctx.fillStyle=Config.visuals.bg;
     this.ctx.fillRect(0,0,w,h);
   }
   rect(r){
-    this.ctx.fillStyle = Config.visuals.fg;
+    this.ctx.fillStyle=Config.visuals.fg;
     this.ctx.fillRect(r.x,r.y,r.w,r.h);
   }
   circle(ball){
-    this.ctx.fillStyle = Config.visuals.fg;
+    this.ctx.fillStyle=Config.visuals.fg;
     this.ctx.beginPath();
     this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI*2);
     this.ctx.fill();
   }
   text(t,x,y,color=Config.visuals.text,size=30){
     this.ctx.fillStyle=color;
-    this.ctx.font = size + "px Arial";
+    this.ctx.font=size+"px Arial";
     this.ctx.fillText(t,x,y);
   }
   dashedCenter(w,h){
     const ctx=this.ctx;
-    ctx.strokeStyle = Config.visuals.centerLine;
+    ctx.strokeStyle=Config.visuals.centerLine;
     ctx.setLineDash([10,10]);
     ctx.beginPath();
     ctx.moveTo(w/2,0);
@@ -166,40 +188,52 @@ class Renderer {
 class Game {
   constructor(canvasEl,restartBtn){
 
-    this.canvas = canvasEl;
-    this.ctx = canvasEl.getContext("2d");
-    this.renderer = new Renderer(this.ctx);
-    this.input = new Input();
+    this.canvas=canvasEl;
+    this.ctx=canvasEl.getContext("2d");
+    this.renderer=new Renderer(this.ctx);
+    this.input=new Input();
 
     // paddles
-    let P = Config.paddle;
-    this.paddleLeft = new Paddle(8, (Config.canvas.height - P.height)/2, P.width, P.height, P.speed, Config.canvas.height);
-    this.paddleRight = new Paddle(Config.canvas.width - P.width - 8, (Config.canvas.height - P.height)/2, P.width, P.height, P.speed, Config.canvas.height);
+    let P=Config.paddle;
+    this.paddleLeft=new Paddle(8,(Config.canvas.height-P.height)/2,P.width,P.height,P.speed,Config.canvas.height);
+    this.paddleRight=new Paddle(Config.canvas.width-P.width-8,(Config.canvas.height-P.height)/2,P.width,P.height,P.speed,Config.canvas.height);
 
     // ball
-    this.ball = new Ball(Config.ball.radius, Config.canvas.width, Config.canvas.height);
+    this.ball=new Ball(Config.ball.radius,Config.canvas.width,Config.canvas.height);
 
-    this.scores = {p1:0, p2:0};
-    this.gameOver = false;
+    this.scores={p1:0,p2:0};
+    this.gameOver=false;
 
-    this.restartBtn = restartBtn;
+    this.restartBtn=restartBtn;
     this.restartBtn.addEventListener("click",()=>this.restart());
 
-    this.loop = this.loop.bind(this);
+    this.loop=this.loop.bind(this);
   }
 
   handleInput(){
     if (this.gameOver) return;
 
+    // Player 1 controls
     if (this.input.isDown(Config.keys.p1Up)) this.paddleLeft.move(-this.paddleLeft.speed);
     if (this.input.isDown(Config.keys.p1Down)) this.paddleLeft.move(this.paddleLeft.speed);
 
-    if (this.input.isDown(Config.keys.p2Up)) this.paddleRight.move(-this.paddleRight.speed);
-    if (this.input.isDown(Config.keys.p2Down)) this.paddleRight.move(this.paddleRight.speed);
+    // Player 2 or AI
+    if (Config.ai.mode === "off") {
+      // Human mode
+      if (this.input.isDown(Config.keys.p2Up)) this.paddleRight.move(-this.paddleRight.speed);
+      if (this.input.isDown(Config.keys.p2Down)) this.paddleRight.move(this.paddleRight.speed);
+    } else {
+      // AI Mode — track ball smoothly
+      const target = this.ball.position.y - this.paddleRight.height/2;
+      const dir = target > this.paddleRight.position.y ? 1 : -1;
+
+      this.paddleRight.move(dir * this.paddleRight.speed * Config.ai.difficulty);
+    }
   }
 
   update(){
     if (this.gameOver) return;
+
     this.ball.update();
 
     // ---------------------------
@@ -207,15 +241,14 @@ class Game {
     // ---------------------------
     const hitLeft =
       this.ball.position.x - this.ball.radius <= this.paddleLeft.position.x + this.paddleLeft.width &&
-      this.ball.position.x - this.ball.radius >= this.paddleLeft.position.x && // ensures ball is actually near paddle
+      this.ball.position.x - this.ball.radius >= this.paddleLeft.position.x &&
       this.ball.position.y >= this.paddleLeft.position.y &&
       this.ball.position.y <= this.paddleLeft.position.y + this.paddleLeft.height;
 
     if (hitLeft){
       this.ball.velocity.x = Math.abs(this.ball.velocity.x);
       this.ball.position.x = this.paddleLeft.position.x + this.paddleLeft.width + this.ball.radius;
-
-      const delta = this.ball.position.y - (this.paddleLeft.position.y + this.paddleLeft.height/2);
+      let delta = this.ball.position.y - (this.paddleLeft.position.y + this.paddleLeft.height/2);
       this.ball.velocity.y = delta * Config.ball.spinFactor;
     }
 
@@ -229,8 +262,7 @@ class Game {
     if (hitRight){
       this.ball.velocity.x = -Math.abs(this.ball.velocity.x);
       this.ball.position.x = this.paddleRight.position.x - this.ball.radius;
-
-      const delta = this.ball.position.y - (this.paddleRight.position.y + this.paddleRight.height/2);
+      let delta = this.ball.position.y - (this.paddleRight.position.y + this.paddleRight.height/2);
       this.ball.velocity.y = delta * Config.ball.spinFactor;
     }
 
@@ -269,6 +301,15 @@ class Game {
     requestAnimationFrame(this.loop);
   }
 }
+
+// --------------------
+// AI DROPDOWN HANDLER
+// --------------------
+document.getElementById("aiSelect").addEventListener("change", e => {
+  const mode = e.target.value;
+  Config.ai.mode = mode;
+  Config.ai.difficulty = AI_SPEED[mode];
+});
 
 // --------------------
 // Boot
