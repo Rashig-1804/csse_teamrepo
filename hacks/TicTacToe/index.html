@@ -32,13 +32,13 @@
           <select id="ttt-mode"><option value="pvp">Player vs Player</option><option value="pva">Player vs AI</option></select>
         </label>
         <label>AI difficulty:
-          <select id="ttt-ai"><option value="random">Random</option><option value="heuristic">Heuristic</option></select>
+          <select id="ttt-ai"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
         </label>
         <label>Board size:
           <select id="ttt-size"><option value="3">3 × 3</option><option value="4">4 × 4</option></select>
         </label>
         <label>Theme:
-          <select id="ttt-theme"><option value="light">Light</option><option value="dark" selected>Dark</option><option value="blue">Blue</option></select>
+          <select id="ttt-theme"><option value="dark" selected>Black / Dark</option><option value="white">White / Light</option><option value="bluepurple">Blue / Purple</option><option value="teal">Teal / Cyan</option></select>
         </label>
         <button id="ttt-reset">New Round</button>
         <button id="ttt-reset-scores">Reset Scores</button>
@@ -57,7 +57,7 @@
     <p style="margin-top:10px"><a href="/csse_teamrepo/games/tictactoe">Back to post</a> • <a href="/csse_teamrepo/hacks/TicTacToe/TicTacToe.html">Lesson: OOP overview</a></p>
   </main>
 
-  <script>
+    <script>
     (function(){
       const boardEl = document.getElementById('tictactoe-board');
       const statusEl = document.getElementById('ttt-status');
@@ -75,7 +75,7 @@
       let scores = { X:0, O:0, ties:0 };
 
       function applyTheme(theme){
-        document.body.classList.remove('ttt-theme-light','ttt-theme-dark','ttt-theme-blue');
+        document.body.classList.remove('ttt-theme-dark','ttt-theme-white','ttt-theme-bluepurple','ttt-theme-teal');
         document.body.classList.add('ttt-theme-' + theme);
       }
 
@@ -123,28 +123,24 @@
       function updateScoresDisplay(){ document.getElementById('ttt-scores').textContent = `X: ${scores.X} • O: ${scores.O} • Ties: ${scores.ties}`; }
 
       function checkWinner(){
-        // rows
         for(let r=0;r<size;r++){
           for(let c=0;c<=size-winLen;c++){
             const first = board[rcToIndex(r,c)]; if(!first) continue;
             let ok=true; for(let k=1;k<winLen;k++) if(board[rcToIndex(r,c+k)]!==first) ok=false; if(ok) return first;
           }
         }
-        // cols
         for(let c=0;c<size;c++){
           for(let r=0;r<=size-winLen;r++){
             const first = board[rcToIndex(r,c)]; if(!first) continue;
             let ok=true; for(let k=1;k<winLen;k++) if(board[rcToIndex(r+k,c)]!==first) ok=false; if(ok) return first;
           }
         }
-        // diag down-right
         for(let r=0;r<=size-winLen;r++){
           for(let c=0;c<=size-winLen;c++){
             const first = board[rcToIndex(r,c)]; if(!first) continue;
             let ok=true; for(let k=1;k<winLen;k++) if(board[rcToIndex(r+k,c+k)]!==first) ok=false; if(ok) return first;
           }
         }
-        // diag up-right
         for(let r=winLen-1;r<size;r++){
           for(let c=0;c<=size-winLen;c++){
             const first = board[rcToIndex(r,c)]; if(!first) continue;
@@ -156,14 +152,34 @@
 
       function availableMoves(){ return board.map((v,i)=> v?null:i).filter(v=>v!==null); }
 
+      // AI move with difficulty levels
       function aiMove(){
-        const mode = aiSelect.value; const aiSymbol='O'; const human='X';
-        if(mode==='heuristic' && size===3){
+        const level = aiSelect.value; const aiSymbol='O'; const human='X';
+        if(level === 'easy'){
+          const moves = availableMoves(); if(moves.length===0) return; const pick = moves[Math.floor(Math.random()*moves.length)]; makeMove(pick, aiSymbol); return;
+        }
+        if(level === 'medium'){
+          // try win
+          for(const i of availableMoves()){ const copy=board.slice(); copy[i]=aiSymbol; if(simCheckWinner(copy, aiSymbol)){ makeMove(i, aiSymbol); return; } }
+          // block
+          for(const i of availableMoves()){ const copy=board.slice(); copy[i]=human; if(simCheckWinner(copy, human)){ makeMove(i, aiSymbol); return; } }
+          // center
+          const center = Math.floor(size*size/2); if(board[center]===''){ makeMove(center, aiSymbol); return; }
+          // fallback random
+          const moves = availableMoves(); if(moves.length===0) return; const pick = moves[Math.floor(Math.random()*moves.length)]; makeMove(pick, aiSymbol); return;
+        }
+        if(level === 'hard' && size===3){
+          // minimax for 3x3
+          const best = minimax(board, aiSymbol);
+          if(best.move !== undefined) { makeMove(best.move, aiSymbol); return; }
+        }
+        // fallback for hard on larger boards
+        if(level === 'hard'){
+          // use medium heuristic
           for(const i of availableMoves()){ const copy=board.slice(); copy[i]=aiSymbol; if(simCheckWinner(copy, aiSymbol)){ makeMove(i, aiSymbol); return; } }
           for(const i of availableMoves()){ const copy=board.slice(); copy[i]=human; if(simCheckWinner(copy, human)){ makeMove(i, aiSymbol); return; } }
-          const center = Math.floor(size*size/2); if(board[center]===''){ makeMove(center, aiSymbol); return; }
+          const moves = availableMoves(); if(moves.length===0) return; const pick = moves[Math.floor(Math.random()*moves.length)]; makeMove(pick, aiSymbol); return;
         }
-        const moves = availableMoves(); if(moves.length===0) return; const pick = moves[Math.floor(Math.random()*moves.length)]; makeMove(pick, aiSymbol);
       }
 
       function simCheckWinner(simBoard, symbol){
@@ -174,6 +190,40 @@
         for(let r=winLen-1;r<size;r++){ for(let c=0;c<=size-winLen;c++){ let ok=true; for(let k=0;k<winLen;k++) if(valAt(r-k,c+k)!==symbol) ok=false; if(ok) return true; } }
         return false;
       }
+
+      // Minimax implementation for 3x3 (hard difficulty)
+      function minimax(currBoard, player){
+        const human = 'X'; const ai = 'O';
+        const winner = evaluateBoard(currBoard);
+        if(winner === ai) return {score: 1};
+        if(winner === human) return {score: -1};
+        if(currBoard.every(Boolean)) return {score: 0};
+
+        const moves = availableMovesOn(currBoard);
+        const isMax = (player === ai);
+        let best = { score: isMax ? -Infinity : Infinity };
+
+        for(const m of moves){
+          const copy = currBoard.slice(); copy[m] = player;
+          const result = minimax(copy, player === ai ? human : ai);
+          if(isMax){
+            if(result.score > best.score){ best = { score: result.score, move: m }; }
+          } else {
+            if(result.score < best.score){ best = { score: result.score, move: m }; }
+          }
+        }
+        return best;
+      }
+
+      function evaluateBoard(bd){
+        const lines = [
+          [0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]
+        ];
+        for(const ln of lines){ const [a,b,c] = ln; if(bd[a] && bd[a]===bd[b] && bd[a]===bd[c]) return bd[a]; }
+        return null;
+      }
+
+      function availableMovesOn(bd){ return bd.map((v,i)=> v?null:i).filter(v=>v!==null); }
 
       resetBtn.addEventListener('click', ()=>{ board = Array(size*size).fill(''); turn='X'; render(); });
       resetScoresBtn.addEventListener('click', ()=>{ scores={X:0,O:0,ties:0}; updateScoresDisplay(); render(); });
