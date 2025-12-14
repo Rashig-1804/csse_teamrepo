@@ -4,6 +4,8 @@ title: Breakout
 permalink: /breakout
 ---
 
+<!-- This is our Breakout Game! -->
+
 <style>
   canvas {
     background: #000;
