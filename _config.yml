@@ -52,6 +52,14 @@ plugins:
   - jekyll-remote-theme
   - jekyll-include-cache
 
+# Exclude local virtualenvs and build artifacts from the watcher and build
+exclude:
+  - ".venv"
+  - "venv"
+  - "_site"
+  - "vendor"
+  - "vendor/bundle"
+
 # Minima-specific settings (applicable to Minima v3 and above only)
 # -----------------------------------------------------------------
 #
