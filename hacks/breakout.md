@@ -4,7 +4,6 @@ title: Breakout
 permalink: /breakout
 ---
 
-<!-- This is our Breakout Game! -->
 
 <style>
   canvas {
@@ -204,6 +203,7 @@ permalink: /breakout
           // Base update method - to be overridden
       }
   }
+
 
   // Ball class - handles ball physics and movement
   class Ball extends GameObject {
