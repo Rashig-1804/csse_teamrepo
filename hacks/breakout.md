@@ -379,6 +379,11 @@ permalink: /breakout
           return this.status === 1;
       }
 
+
+      getPoints() {
+          return 1;
+      }
+
       setColor(newColor) {
           this.color = newColor;
           this.baseColor = newColor;
@@ -397,6 +402,10 @@ permalink: /breakout
           this.baseColor = this.color;
           this.hasPowerUp = false; // explosive bricks don't include power-ups
           this.explosionRadius = 90; // pixels
+      }
+
+      getPoints() {
+          return 3;
       }
 
       // Explode and destroy nearby bricks (accepts game instance)
@@ -677,7 +686,8 @@ permalink: /breakout
               if (brick.isActive() && this.ball.collidesWith(brick)) {
                   this.ball.dy = -this.ball.dy;
                   brick.destroy();
-                  this.score++;
+                  game.score += brick.getPoints();
+
                   
                   if (brick.hasPowerUp) {
                       this.powerUps.push(new PowerUp(brick.x + brick.width / 2, brick.y));
