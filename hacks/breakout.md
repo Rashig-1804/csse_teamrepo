@@ -4,6 +4,7 @@ title: Breakout
 permalink: /breakout
 ---
 
+<!-- This is our Breakout Game! -->
 
 <style>
   canvas {
@@ -203,7 +204,6 @@ permalink: /breakout
           // Base update method - to be overridden
       }
   }
-
 
   // Ball class - handles ball physics and movement
   class Ball extends GameObject {
@@ -735,6 +735,7 @@ permalink: /breakout
           return false;
       }
       
+
       checkBallCollision() {
           // Ball hits bottom
           if (this.ball.y + this.ball.dy > this.height - this.ball.radius) {
@@ -751,7 +752,7 @@ permalink: /breakout
               }
           }
       }
-      
+      // This function says the final score, displays game over, and resets the game.
       gameOver() {
           this.gameRunning = false;
           this.paused = true;

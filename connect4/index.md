@@ -17,6 +17,19 @@ permalink: /connect4/
 			<button class="btn" data-time="300">5 Minutes</button>
 			<button class="btn" data-time="600">10 Minutes</button>
 		</div>
+		<div class="row" style="margin-top:8px; align-items:center">
+			<label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
+				<input type="checkbox" id="vsRobot"> Play vs Computer
+			</label>
+			<label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
+				Theme:
+				<select id="themeSelect" style="margin-left:6px; padding:6px; border-radius:6px; background:#222; color:#fff; border:1px solid #333">
+					<option value="dark">Dark</option>
+					<option value="light">Light</option>
+					<option value="retro">Retro</option>
+				</select>
+			</label>
+		</div>
 		<p class="press">Click a time to start (or press <kbd>Enter</kbd>). During the game click any column to drop a coin.</p>
 	</section>
 
@@ -111,6 +124,13 @@ kbd{background:#222; padding:2px 6px; border-radius:6px; border:1px solid #333}
 .win-title{font-size:36px; margin:0 0 24px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.3);}
 .win-btn{font-size:18px; padding:12px 24px; background:var(--blue); border-color:#1658e5;}
 .win-btn:hover{background:#1d6bf0}
+/* Theme variants (applied to document via data-theme attribute) */
+[data-theme="light"]{
+	--bg:#f6f8fb; --card:#ffffff; --muted:#6b7280; --blue:#0f62fe; --red:#d32f2f; --yellow:#f59e0b; --cell:76px;
+}
+[data-theme="retro"]{
+	--bg:#f4ecd8; --card:#fff7e6; --muted:#6b4f2b; --blue:#2b6f7e; --red:#b22222; --yellow:#e0b72b; --cell:76px;
+}
 @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
 @keyframes popIn{from{transform:scale(.8); opacity:0;} to{transform:scale(1); opacity:1;}}
 </style>
@@ -118,7 +138,7 @@ kbd{background:#222; padding:2px 6px; border-radius:6px; border:1px solid #333}
 <script>
 // ========= PLAYER CLASS =========
 class Player {
-	constructor(name,color){this.name=name; this.color=color; this.time=300; this.coins=21;}
+ 	constructor(name,color,isRobot=false){this.name=name; this.color=color; this.time=300; this.coins=21; this.isRobot=!!isRobot;}
 	setTime(s){this.time=s;}
 	usesCoin(){if(this.coins>0){this.coins--; return true;} return false;}
 	hasTimeLeft(){return this.time>0;}
@@ -201,9 +221,18 @@ class Connect4Game{
 		this.ui.elements.restartBtn.addEventListener('click',()=>this.restart());
 	}
 	startGame(t){
+		// configure robot and theme from start screen
+		const vsRobot = document.getElementById('vsRobot');
+		const themeSelect = document.getElementById('themeSelect');
+		const theme = themeSelect ? themeSelect.value : 'dark';
+		document.documentElement.setAttribute('data-theme', theme);
 		this.board.reset(); this.redPlayer.reset(t); this.yellowPlayer.reset(t); this.currentPlayer=this.redPlayer; this.isRunning=true; this.isAnimating=false;
+		// enable robot for yellow if requested
+		if (vsRobot && vsRobot.checked) this.yellowPlayer.isRobot = true; else this.yellowPlayer.isRobot = false;
 		this.ui.showGameScreen(); this.ui.createBoard(this.board.rows,this.board.cols); this.ui.updateBoard(this.board); this.ui.updatePlayerInfo(this.redPlayer,this.yellowPlayer);
 		this.timer.start(()=>this.handleTimerTick());
+		// if the starting player is a robot, let it move
+		if (this.currentPlayer && this.currentPlayer.isRobot) setTimeout(()=>this.performAIMove(), 400);
 	}
 	async handleBoardClick(e){
 		const hole=e.target.closest('.hole'); if(!hole||!this.isRunning||this.isAnimating)return;
@@ -217,7 +246,29 @@ class Connect4Game{
 		this.switchPlayer();
 	}
 	handleTimerTick(){if(!this.isRunning)return; this.currentPlayer.decrementTime(); if(!this.currentPlayer.hasTimeLeft()){const winner=this.currentPlayer===this.redPlayer?this.yellowPlayer:this.redPlayer; this.endGame(`${winner.name} wins on time!`); return;} this.ui.updatePlayerInfo(this.redPlayer,this.yellowPlayer);}
-	switchPlayer(){this.currentPlayer=this.currentPlayer===this.redPlayer?this.yellowPlayer:this.redPlayer;}
+	switchPlayer(){
+		this.currentPlayer=this.currentPlayer===this.redPlayer?this.yellowPlayer:this.redPlayer;
+		if (this.currentPlayer && this.currentPlayer.isRobot) setTimeout(()=>this.performAIMove(), 400);
+	}
+
+	async performAIMove(){
+		if (!this.isRunning || this.isAnimating) return;
+		// choose a random valid column
+		const validCols = [];
+		for (let c=0;c<this.board.cols;c++){ if (this.board.isValidColumn(c)) validCols.push(c); }
+		if (validCols.length===0) return;
+		const col = validCols[Math.floor(Math.random()*validCols.length)];
+		const row = this.board.getDropRow(col);
+		if (row<0) return;
+		this.isAnimating=true;
+		await this.ui.animateFallingCoin(col,row,this.currentPlayer.color);
+		this.board.placePiece(row,col,this.currentPlayer.color);
+		this.ui.updateBoard(this.board); this.ui.updatePlayerInfo(this.redPlayer,this.yellowPlayer);
+		this.isAnimating=false;
+		if(this.board.checkWin(row,col)){ this.endGame(`${this.currentPlayer.name} wins!`); return; }
+		if(this.board.isFull()){ this.endGame('Draw!'); return; }
+		this.switchPlayer();
+	}
 	endGame(msg){this.isRunning=false; this.timer.stop(); this.ui.showWinMessage(msg);} 
 	restart(){this.timer.stop(); this.ui.showStartScreen(); this.isRunning=false;}
 }

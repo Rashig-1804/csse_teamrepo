@@ -9,6 +9,19 @@
       <button class="btn" data-time="600">10 Minutes</button>
     </div>
     <p class="press">Click a time to start (or press <kbd>Enter</kbd>). During the game click any column to drop a coin.</p>
+    <div class="row" style="margin-top:8px; align-items:center">
+      <label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
+        <input type="checkbox" id="vsRobot"> Play vs Computer
+      </label>
+      <label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
+        Theme:
+        <select id="themeSelect" style="margin-left:6px; padding:6px; border-radius:6px; background:#222; color:#fff; border:1px solid #333">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="retro">Retro</option>
+        </select>
+      </label>
+    </div>
   </section>
 
   <!-- Game Screen - Board Overlay -->
@@ -195,6 +208,13 @@
   .win-btn:hover{
     background: #1d6bf0;
   }
+  /* Theme variants (applied to document via data-theme attribute) */
+  [data-theme="light"]{
+    --bg:#f6f8fb; --card:#ffffff; --muted:#6b7280; --blue:#0f62fe; --red:#d32f2f; --yellow:#f59e0b; --cell:76px;
+  }
+  [data-theme="retro"]{
+    --bg:#f4ecd8; --card:#fff7e6; --muted:#6b4f2b; --blue:#2b6f7e; --red:#b22222; --yellow:#e0b72b; --cell:76px;
+  }
   @keyframes fadeIn{
     from{ opacity: 0; }
     to{ opacity: 1; }
@@ -209,11 +229,12 @@
 <script>
 // ========= PLAYER CLASS =========
 class Player {
-  constructor(name, color) {
+  constructor(name, color, isRobot = false) {
     this.name = name;
     this.color = color;
     this.time = 300; // default 5 minutes
     this.coins = 21;
+    this.isRobot = !!isRobot;
   }
 
   setTime(seconds) {
@@ -507,6 +528,12 @@ class Connect4Game {
   }
 
   startGame(timeInSeconds) {
+    // read controls: robot and theme
+    const vsRobot = document.getElementById('vsRobot');
+    const themeSelect = document.getElementById('themeSelect');
+    const theme = themeSelect ? themeSelect.value : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+
     // Reset game state
     this.board.reset();
     this.redPlayer.reset(timeInSeconds);
@@ -514,6 +541,9 @@ class Connect4Game {
     this.currentPlayer = this.redPlayer;
     this.isRunning = true;
     this.isAnimating = false;
+
+    // configure robot
+    if (vsRobot && vsRobot.checked) this.yellowPlayer.isRobot = true; else this.yellowPlayer.isRobot = false;
 
     // Setup UI
     this.ui.showGameScreen();
@@ -526,6 +556,9 @@ class Connect4Game {
       () => this.handleTimerTick(),
       (player) => this.handleTimeUp(player)
     );
+
+    // If starting player is robot, let it move
+    if (this.currentPlayer && this.currentPlayer.isRobot) setTimeout(()=>this.performAIMove(), 400);
   }
 
   async handleBoardClick(event) {
@@ -583,6 +616,29 @@ class Connect4Game {
 
   switchPlayer() {
     this.currentPlayer = this.currentPlayer === this.redPlayer ? this.yellowPlayer : this.redPlayer;
+    if (this.currentPlayer && this.currentPlayer.isRobot) setTimeout(()=>this.performAIMove(), 400);
+  }
+
+  async performAIMove() {
+    if (!this.isRunning || this.isAnimating) return;
+    // simple random AI: pick a random valid column
+    const validCols = [];
+    for (let c = 0; c < this.board.cols; c++) {
+      if (this.board.isValidColumn(c)) validCols.push(c);
+    }
+    if (validCols.length === 0) return;
+    const col = validCols[Math.floor(Math.random() * validCols.length)];
+    const row = this.board.getDropRow(col);
+    if (row < 0) return;
+    this.isAnimating = true;
+    await this.ui.animateFallingCoin(col, row, this.currentPlayer.color);
+    this.board.placePiece(row, col, this.currentPlayer.color);
+    this.ui.updateBoard(this.board);
+    this.ui.updatePlayerInfo(this.redPlayer, this.yellowPlayer);
+    this.isAnimating = false;
+    if (this.board.checkWin(row, col)) { this.endGame(`${this.currentPlayer.name} wins!`); return; }
+    if (this.board.isFull()) { this.endGame('Draw!'); return; }
+    this.switchPlayer();
   }
 
   endGame(message) {
