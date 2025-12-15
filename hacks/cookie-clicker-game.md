@@ -4,6 +4,8 @@ title: Cookie Clicker Game
 permalink: /cookie-clicker-game/
 ---
 
+<!-- This is the cookie clicker game!>
+
 <!-- Main container with grid layout: 1 column for shop, 3 columns for the game -->
 <div class="grid grid-cols-4 gap-4 aspect-square">
 

@@ -262,6 +262,10 @@ const gameLoop = {
   },
 };
 
+/*
+*I helped add the EmojiBuddy class and integrated it for auto-clicker purchase visuals
+*/
+
 class EmojiBuddy {
   /**
    * @type {{top: number, left: number, right: number, bottom: number, width: number, height: number}}
