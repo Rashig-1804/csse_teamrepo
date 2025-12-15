@@ -8,7 +8,7 @@
       <button class="btn" data-time="300">5 Minutes</button>
       <button class="btn" data-time="600">10 Minutes</button>
     </div>
-    <p class="press">…or press <kbd>Enter</kbd> to start with 5:00</p>
+    <p class="press">Click a time to start (or press <kbd>Enter</kbd>). During the game click any column to drop a coin.</p>
   </section>
 
   <!-- Game Screen - Board Overlay -->
@@ -599,7 +599,7 @@ class Connect4Game {
 }
 
 // ========= INITIALIZE GAME =========
-(() => {
-  const game = new Connect4Game();
-})();
+window.addEventListener('DOMContentLoaded', () => {
+  new Connect4Game();
+});
 </script>

@@ -1,23 +1,10 @@
 ---
-layout: page
-title: "Connect 4"
-permalink: /connect4/
-hide: false
-show_reading_time: false
----
-
-## Connect 4
-
-This is the Connect 4 project page. If you have a playable version (HTML/JS), add it to this page or update the content to redirect/embed the game.
-
-To embed a hosted game, replace this content with an iframe or a link, for example:
-
----
 layout: opencs
 title: Connect 4
 description: Play Connect 4 in the browser
 permalink: /connect4/
 ---
+ 
 
 <div id="app" class="wrap">c
 
@@ -30,7 +17,7 @@ permalink: /connect4/
 			<button class="btn" data-time="300">5 Minutes</button>
 			<button class="btn" data-time="600">10 Minutes</button>
 		</div>
-		<p class="press">…or press <kbd>Enter</kbd> to start with 5:00</p>
+		<p class="press">Click a time to start (or press <kbd>Enter</kbd>). During the game click any column to drop a coin.</p>
 	</section>
 
 	<!-- ===== GAME SCREEN ===== -->
@@ -235,5 +222,5 @@ class Connect4Game{
 	restart(){this.timer.stop(); this.ui.showStartScreen(); this.isRunning=false;}
 }
 
-(() => {const game=new Connect4Game();})();
+window.addEventListener('DOMContentLoaded', () => { new Connect4Game(); });
 </script>
