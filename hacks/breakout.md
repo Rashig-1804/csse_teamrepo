@@ -5,7 +5,7 @@ permalink: /breakout
 ---
 
 <!-- This is our Breakout Game! -->
-
+This is the Breakout Game. Make sure you control the ball with your paddle and destroy the wall of bricks! Don't let the ball hit the ground otherwise you will lose a life!
 <style>
   canvas {
     background: #000;
