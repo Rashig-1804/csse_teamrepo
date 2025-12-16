@@ -49,15 +49,14 @@ permalink: /breakout
 </div>
 
 <div id="information" style="max-width:600px;margin:8px auto;font-family:system-ui,Arial;">
-    <h2>OOP Breakout Game Lesson</h2>
-    <p><strong>Learn Object-Oriented Programming</strong></p>
-    <p>Learn the basics of building a <strong>Breakout-style game</strong> using Object-Oriented Programming principles in JavaScript.</p>
-    <p>In this refactored version, you'll understand how to organize code into <strong>classes</strong>, manage <strong>game state</strong>, and create <strong>reusable components</strong> for game development.</p>
+    <h2>OOP Breakout Game</h2>
+    <p><strong>How this game works!</strong></p>
     <ul style="margin:8px 0 12px 20px;">
-        <li>Understand how classes encapsulate game object behavior.</li>
-        <li>Learn the difference between encapsulation and true inheritance.</li>
-        <li>Practice creating modular, maintainable game architecture.</li>
-        <li>Explore how OOP makes adding new features easier.</li>
+        <li>**The Game Loop:** The whole game is a continuous loop that constantly updates object positions and redraws the screen</li>
+        <li>**Object-Oriented (OOP) Code:** Every major item (Ball, Paddle, Brick) is a separate **Class** in the code, keeping their unique behaviors separate and organized and easy to find! (like movement or score points) </li>
+        <li>**Movement:** The **Ball** updates its position based on its speed (`dx` and `dy`), while the **Paddle** moves based on input such as the arrow keys we press</li>
+        <li>**Collisions & Bouncing:** A core function checks for when the ball and brick overlap or touch, and that makes the ball's direction reverse </li>
+        <li>**Bricks & Score:** Hitting a **Brick** changes its status to "destroyed," and adds points to the score </li>
     </ul>
 </div>
 
