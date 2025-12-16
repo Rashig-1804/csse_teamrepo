@@ -17,13 +17,13 @@ permalink: /connect4/
 			<button class="btn" data-time="300">5 Minutes</button>
 			<button class="btn" data-time="600">10 Minutes</button>
 		</div>
-		<div class="row" style="margin-top:8px; align-items:center">
+		<div class="row controls" style="margin-top:8px; align-items:center">
 			<label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
 				<input type="checkbox" id="vsRobot"> Play vs Computer
 			</label>
 			<label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
 				Theme:
-				<select id="themeSelect" style="margin-left:6px; padding:6px; border-radius:6px; background:#222; color:#fff; border:1px solid #333">
+				<select id="themeSelect" style="margin-left:6px; padding:6px; border-radius:6px;">
 					<option value="dark">Dark</option>
 					<option value="light">Light</option>
 					<option value="retro">Retro</option>
@@ -131,6 +131,18 @@ kbd{background:#222; padding:2px 6px; border-radius:6px; border:1px solid #333}
 [data-theme="retro"]{
 	--bg:#f4ecd8; --card:#fff7e6; --muted:#6b4f2b; --blue:#2b6f7e; --red:#b22222; --yellow:#e0b72b; --cell:76px;
 }
+/* Make controls visible across themes */
+.row.controls{display:flex; gap:8px; align-items:center}
+.row.controls label{color:var(--muted); display:flex; align-items:center; gap:8px}
+.row.controls select{
+	background: #fff !important;
+	color: #000 !important;
+	border: 1px solid #444 !important;
+	padding:6px 8px !important;
+	border-radius:8px !important;
+	appearance: auto !important;
+}
+.row.controls input[type="checkbox"]{accent-color:var(--blue); width:18px; height:18px}
 @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
 @keyframes popIn{from{transform:scale(.8); opacity:0;} to{transform:scale(1); opacity:1;}}
 </style>
@@ -174,6 +186,7 @@ class GameTimer{
 	constructor(){this.intervalId=null; this.onTick=null; this.onTimeUp=null;}
 	start(tickCb,timeUpCb){this.onTick=tickCb; this.onTimeUp=timeUpCb; this.intervalId=setInterval(()=>{if(this.onTick)this.onTick();},1000);} 
 	stop(){if(this.intervalId){clearInterval(this.intervalId); this.intervalId=null;}}
+	reset(){this.stop();}
 }
 
 // ========= GAME UI =========
@@ -217,6 +230,15 @@ class Connect4Game{
 	initEvents(){
 		this.ui.elements.start.querySelectorAll('.btn').forEach(b=>b.addEventListener('click',()=>{this.startGame(parseInt(b.dataset.time));}));
 		window.addEventListener('keydown',e=>{if(!this.ui.elements.game.classList.contains('hidden')||e.key!=='Enter')return; this.startGame(300);});
+		// theme selector live update
+		const themeSelect = document.getElementById('themeSelect');
+		if(themeSelect){
+			themeSelect.addEventListener('change', ()=>{
+				document.documentElement.setAttribute('data-theme', themeSelect.value);
+			});
+			// apply initial value
+			document.documentElement.setAttribute('data-theme', themeSelect.value);
+		}
 		this.ui.elements.board.addEventListener('click',e=>this.handleBoardClick(e));
 		this.ui.elements.restartBtn.addEventListener('click',()=>this.restart());
 	}
@@ -230,7 +252,7 @@ class Connect4Game{
 		// enable robot for yellow if requested
 		if (vsRobot && vsRobot.checked) this.yellowPlayer.isRobot = true; else this.yellowPlayer.isRobot = false;
 		this.ui.showGameScreen(); this.ui.createBoard(this.board.rows,this.board.cols); this.ui.updateBoard(this.board); this.ui.updatePlayerInfo(this.redPlayer,this.yellowPlayer);
-		this.timer.start(()=>this.handleTimerTick());
+		this.timer.start(this.handleTimerTick.bind(this));
 		// if the starting player is a robot, let it move
 		if (this.currentPlayer && this.currentPlayer.isRobot) setTimeout(()=>this.performAIMove(), 400);
 	}
@@ -270,7 +292,23 @@ class Connect4Game{
 		this.switchPlayer();
 	}
 	endGame(msg){this.isRunning=false; this.timer.stop(); this.ui.showWinMessage(msg);} 
-	restart(){this.timer.stop(); this.ui.showStartScreen(); this.isRunning=false;}
+
+	restart(){
+		console.log('Connect4: restart pressed');
+		this.timer.stop();
+		// reset board and players to default (5 minutes)
+		const defaultTime = 300;
+		this.board.reset();
+		this.redPlayer.reset(defaultTime);
+		this.yellowPlayer.reset(defaultTime);
+		this.currentPlayer = this.redPlayer;
+		this.isAnimating = false;
+		this.isRunning = false;
+		this.ui.createBoard(this.board.rows,this.board.cols);
+		this.ui.updateBoard(this.board);
+		this.ui.updatePlayerInfo(this.redPlayer,this.yellowPlayer);
+		this.ui.showStartScreen();
+	}
 }
 
 window.addEventListener('DOMContentLoaded', () => { new Connect4Game(); });

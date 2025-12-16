@@ -9,13 +9,13 @@
       <button class="btn" data-time="600">10 Minutes</button>
     </div>
     <p class="press">Click a time to start (or press <kbd>Enter</kbd>). During the game click any column to drop a coin.</p>
-    <div class="row" style="margin-top:8px; align-items:center">
+    <div class="row controls" style="margin-top:8px; align-items:center">
       <label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
         <input type="checkbox" id="vsRobot"> Play vs Computer
       </label>
       <label style="display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted)">
         Theme:
-        <select id="themeSelect" style="margin-left:6px; padding:6px; border-radius:6px; background:#222; color:#fff; border:1px solid #333">
+        <select id="themeSelect" style="margin-left:6px; padding:6px; border-radius:6px;">
           <option value="dark">Dark</option>
           <option value="light">Light</option>
           <option value="retro">Retro</option>
@@ -215,6 +215,18 @@
   [data-theme="retro"]{
     --bg:#f4ecd8; --card:#fff7e6; --muted:#6b4f2b; --blue:#2b6f7e; --red:#b22222; --yellow:#e0b72b; --cell:76px;
   }
+  /* Make controls visible across themes */
+  .row.controls{display:flex; gap:8px; align-items:center}
+  .row.controls label{color:var(--muted); display:flex; align-items:center; gap:8px}
+  .row.controls select{
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #444 !important;
+    padding:6px 8px !important;
+    border-radius:8px !important;
+    appearance: auto !important;
+  }
+  .row.controls input[type="checkbox"]{accent-color:var(--blue); width:18px; height:18px}
   @keyframes fadeIn{
     from{ opacity: 0; }
     to{ opacity: 1; }
@@ -515,6 +527,15 @@ class Connect4Game {
       if (!this.ui.elements.game.classList.contains('hidden') || e.key !== 'Enter') return;
       this.startGame(300);
     });
+    // theme selector live update
+    const themeSelect = document.getElementById('themeSelect');
+    if (themeSelect) {
+      themeSelect.addEventListener('change', () => {
+        document.documentElement.setAttribute('data-theme', themeSelect.value);
+      });
+      // apply initial selection
+      document.documentElement.setAttribute('data-theme', themeSelect.value);
+    }
 
     // Board clicks
     this.ui.elements.board.addEventListener('click', (e) => {
@@ -552,10 +573,14 @@ class Connect4Game {
     this.ui.updatePlayerInfo(this.redPlayer, this.yellowPlayer);
 
     // Start timer
-    this.timer.start(
-      () => this.handleTimerTick(),
-      (player) => this.handleTimeUp(player)
-    );
+    this.timer.start(this.handleTimerTick.bind(this));
+
+    // safe time-up handler (keeps compatibility)
+    if (!this.handleTimeUp) {
+      this.handleTimeUp = (player) => {
+        this.endGame(`${player.name} wins on time!`);
+      };
+    }
 
     // If starting player is robot, let it move
     if (this.currentPlayer && this.currentPlayer.isRobot) setTimeout(()=>this.performAIMove(), 400);
