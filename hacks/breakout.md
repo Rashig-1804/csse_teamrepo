@@ -52,11 +52,11 @@ permalink: /breakout
     <h2>OOP Breakout Game</h2>
     <p><strong>How this game works!</strong></p>
     <ul style="margin:8px 0 12px 20px;">
-        <li>**The Game Loop:** The whole game is a continuous loop that constantly updates object positions and redraws the screen</li>
-        <li>**Object-Oriented (OOP) Code:** Every major item (Ball, Paddle, Brick) is a separate **Class** in the code, keeping their unique behaviors separate and organized and easy to find! (like movement or score points) </li>
-        <li>**Movement:** The **Ball** updates its position based on its speed (`dx` and `dy`), while the **Paddle** moves based on input such as the arrow keys we press</li>
-        <li>**Collisions & Bouncing:** A core function checks for when the ball and brick overlap or touch, and that makes the ball's direction reverse </li>
-        <li>**Bricks & Score:** Hitting a **Brick** changes its status to "destroyed," and adds points to the score </li>
+        <li>The game loop: The whole game is a continuous loop that constantly updates object positions and redraws the screen</li>
+        <li>The object-oriented code: Every major item like the ball and brick is a separate class in the code, keeping their unique behaviors separate and organized and easy to find! (like movement or score points) </li>
+        <li>Movement: The ball updates its position based on its speed, while the paddle moves based on input such as the arrow keys we press</li>
+        <li>Collisions & Bouncing: A core function checks for when the ball and brick overlap or touch, and that makes the ball's direction reverse </li>
+        <li>Bricks & Score: Hitting a Brick changes its status to "destroyed," and adds points to the score </li>
     </ul>
 </div>
 
