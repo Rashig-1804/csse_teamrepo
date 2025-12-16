@@ -4,9 +4,9 @@ title: Cookie Clicker Game
 permalink: /cookie-clicker-game/
 ---
 
-<!-- This is the cookie clicker game!>
+This is the cookie clicker game!
+This is a game where the player clicks the central cookie to earn currency, which is then used to buy upgrades. The game's structure and content are provided by HTML. All the core game logic such as counting cookies and handling purchases is handled by an external Javascript file 
 
-<! -- This is a game where the player clicks the central cookie to earn currency, which is then used to buy upgrades. The game's structure and content are provided by HTML. All the core game logic such as counting cookies and handling purchases is handled by an external Javascript file >
 <!-- Main container with grid layout: 1 column for shop, 3 columns for the game -->
 
 <div class="grid grid-cols-4 gap-4 aspect-square">
