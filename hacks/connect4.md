@@ -1,4 +1,4 @@
-Click enter to start! 
+## Click enter to start! 
 
 <div id="app" class="wrap">
   <!-- Start Screen -->
