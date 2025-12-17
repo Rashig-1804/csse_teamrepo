@@ -58,15 +58,15 @@ permalink: /rockpaper
     </div>
     <div id="images" style="display:flex; justify-content:center; gap:20px; margin-bottom:14px;">
       <button id="rock-btn" style="background:none; border:none; padding:0; cursor:pointer;">
-        <img id="rock-img" src="{{site.baseurl}}/images/rps/rock.jpg"
+        <img id="rock-img" src="{{site.baseurl}}/images/rock.jpg"
              style="width:100px; border:2px solid white; border-radius:10px;">
       </button>
       <button id="paper-btn" style="background:none; border:none; padding:0; cursor:pointer;">
-        <img id="paper-img" src="{{site.baseurl}}/images/rps/paper.jpeg"
+        <img id="paper-img" src="{{site.baseurl}}/images/paper.jpg"
              style="width:100px; border:2px solid white; border-radius:10px;">
       </button>
       <button id="scissors-btn" style="background:none; border:none; padding:0; cursor:pointer;">
-        <img id="scissors-img" src="{{site.baseurl}}/images/rps/scissors.jpeg"
+        <img id="scissors-img" src="{{site.baseurl}}/images/scissors.jpg"
              style="width:100px; border:2px solid white; border-radius:10px;">
       </button>
     </div>
@@ -179,11 +179,11 @@ permalink: /rockpaper
   bgImage.src = '{{site.baseurl}}/images/platformer/backgrounds/alien_planet1.jpg';
 
   const rockImg = new Image();
-  rockImg.src = '{{site.baseurl}}/images/rps/rock.jpg';
+  rockImg.src = '{{site.baseurl}}/images/rock.jpg';
   const paperImg = new Image();
-  paperImg.src = '{{site.baseurl}}/images/rps/paper.jpeg';
+  paperImg.src = '{{site.baseurl}}/images/paper.jpg';
   const scissorsImg = new Image();
-  scissorsImg.src = '{{site.baseurl}}/images/rps/scissors.jpeg';
+  scissorsImg.src = '{{site.baseurl}}/images/scissors.jpg';
 
   const bg = new BattleBackground(bgImage, battleCanvas.width, battleCanvas.height, 0.12);
 
