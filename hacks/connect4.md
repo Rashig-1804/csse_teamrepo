@@ -1,5 +1,3 @@
-Click enter to start! 
-
 <div id="app" class="wrap">
   <!-- Start Screen -->
   <section id="start" class="card center">
