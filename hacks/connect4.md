@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+## Click enter to start! 
+
+>>>>>>> deb265a6fbfb5e05bf4e7e362a5e2b1ff19a5e43
 <div id="app" class="wrap">
   <!-- Start Screen -->
   <section id="start" class="card center">

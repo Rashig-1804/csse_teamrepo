@@ -70,9 +70,7 @@ permalink: /rockpaper
              style="width:100px; border:2px solid white; border-radius:10px;">
       </button>
     </div>
-    <div style="margin-bottom:18px; font-size:1.1em; color:#ffd700;">
-      Click any icon to customize using the console!
-    </div>
+    
     <!-- mount battle canvas INSIDE the purple box so you can see it -->
     <div id="battleMount" style="display:block; margin:12px auto;"></div>
 
